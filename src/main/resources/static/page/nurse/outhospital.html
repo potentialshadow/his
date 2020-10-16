@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>出院审核</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<!-- 引入组件库 -->
+<script src="/js/index.js"></script>
+</head>
+<body>
+	<div id="app">
+		<el-form :inline="true" :model="patient" class="demo-form-inline">
+  <el-form-item label="病人编号">
+    <el-input v-model="patient.id" placeholder="请输入病人编号"></el-input>
+  </el-form-item>
+  <el-form-item>
+    <el-button type="primary" @click="onSubmit">查询</el-button>
+  </el-form-item>
+  <el-input
+  placeholder="病人姓名"
+  v-model="patient.paname"
+  :disabled="true">
+</el-input>
+ <el-input
+  placeholder="申请状态"
+  v-model="patient.status"
+  :disabled="true">
+</el-input>
+</el-form>
+		<template>
+			<el-table :data="moneyDetail" border style="width: 100%"> 
+			<el-table-column fixed prop="detail" label="费用详情"></el-table-column> 
+			<el-table-column prop="money" label="剩余费用"> </el-table-column>
+			<el-table-column prop="time" label="时间"> </el-table-column></el-table-column>
+  			</el-table>
+  			</template>
+  			<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+			  <el-col :offset="16">
+				  <el-button type="primary" @click='agree'>允许出院</el-button>
+				   <el-button type="primary" @click='refuse'>拒绝出院</el-button>  
+				</el-col>
+		</template>
+  	</div>
+	<script type="text/javascript">
+	var vm=new Vue({
+		el:'#app',
+		data:{
+			patient:{},
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+			moneyDetail:[],
+			nursings:[],
+			insertNursingDialogVisible:false,
+		},
+		/* created:function(){
+			this.selectNursings();
+			//this.selectButton();
+		}, */
+		methods:{
+			agree:function(){
+				 var _this=this;
+				 if(_this.patient.status=="待审核"){
+					 $.ajax({
+							url:"/outhospital/updateOutHospitalStatus",
+							data:{paid:_this.patient.id,status:1},
+							success:function(data){
+								if(data.code=="200"){
+									alert("操作成功")
+								}
+							}
+						});
+				 }else if(_this.patient.status=="申请已通过"){
+					 alert("申请已通过")
+				 }else{
+					 alert("申请已拒绝")
+				 }
+				
+			},
+			refuse:function(){
+				 var _this=this;
+				 if(_this.patient.status=="待审核"){
+					 $.ajax({
+							url:"/outhospital/updateOutHospitalStatus",
+							data:{paid:_this.patient.id,status:2},
+							success:function(data){
+								if(data.code=="200"){
+									alert("操作成功")
+								}
+								
+							}
+						}); 
+				 }else if(_this.patient.status=="申请已通过"){
+					 alert("申请已通过")
+				 }else{
+					 alert("申请已拒绝")
+				 }
+				
+			},
+			onSubmit:function(){
+				 var _this=this;
+				 $.ajax({
+						url:"/moneyDetail/selectMoneyDetail",
+						data:{paid:_this.patient.id,pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+						success:function(data){
+							if(data.code=="200"&&data.obj!=null){
+									_this.moneyDetail=data.obj.list;
+									_this.page.total=data.obj.total;
+									_this.page.pageNum=data.obj.pageNum;
+									_this.page.pageSize=data.obj.pageSize;
+							}else{
+								_this.moneyDetail=null;
+								alert("无该病人的出院申请");
+							}
+						},
+					});
+				 $.ajax({
+						url:"/outhospital/selectByPaid",
+						data:{paid:_this.patient.id},
+						success:function(data){
+							if(data.code=="200"&&data.obj!=null){
+								_this.patient=data.obj
+								if(_this.patient.status==0){
+									_this.patient.status="待审核";
+								}else if(_this.patient.status==1){
+									_this.patient.status="申请已通过";
+								}else if(_this.patient.status=2){
+									_this.patient.status="申请未通过";
+								}
+							}else{
+								_this.patient.pname='';
+								_this.patient.status='';
+							}
+							
+						}
+					});
+			},
+			 handleSizeChange(val) {
+				 var _this=this;
+			      _this.limit.pageSize=val;
+			      _this.onSubmit();
+			      },
+			      handleCurrentChange(val) {
+			    	  var _this=this;
+			    	  _this.limit.pageNum=val;
+				      _this.onSubmit();
+			      },
+			/* selectButton:function(){
+				var _this=this;
+				var href=location.href;
+				var pid=href.split("?")[1].split("=")[1];
+				$.ajax({
+					url:"/menu",
+					data:{pid:pid},
+					success:function(data){
+						if(data.code=="200"){
+							for(var i=0;i<data.list.length;i++){
+								if(data.list[i].name=="信息录入"){
+									_this.updateUserRoleButton=true;
+								}
+							}
+						}
+						
+					}
+				})
+			}, */
+			insertNursing:function(){
+				var _this=this;
+				_this.insertNursingDialogVisible=true;
+			},
+			insert:function(){
+				var _this=this;
+				$.ajax({
+					url:"/nursing",
+					type:"post",
+					data:_this.nursing,
+					success:function(data){
+						if(data.code=="200"){
+							alert("新增成功");
+							_this.insertNursingDialogVisible=false;
+							location.href="/page/nurse/nursing.html";
+						}
+					}
+				})
+			},
+			deleteNursing:function(id){
+				var _this=this;
+				$.ajax({
+					url:"/nursing",
+					type:"delete",
+					data:{id:id},
+					success:function(data){
+						if(data.code=="200"){
+							alert("删除成功");
+							location.href="/page/nurse/nursing.html";
+						}
+					}
+				})
+			}
+		},
+	})
+	</script>
+</body>
+</html>

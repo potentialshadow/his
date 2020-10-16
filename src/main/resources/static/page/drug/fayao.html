@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>取药功能</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/axios-0.18.0.js" ></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script type="text/javascript" src="/js/qs.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+ </style>
+
+<body>
+<div id="app">
+	
+	<div class="block">
+	<el-row :gutter="20">
+	  <el-col :span="6"><el-input v-model="name" placeholder="请输入病人姓名" ></el-input></el-col>
+	  <el-col :span="6"><el-input v-model="item" placeholder="请输入处方药编号" ></el-input></el-col>
+	<el-button type="primary" @click="insertPatient">查询</el-button>
+	</el-row>
+	</div>
+		<el-table :data="list" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			
+			<el-table-column fixed prop="id" label="编号" > </el-table-column> 
+			<el-table-column prop="did" v-if="pageText"></el-table-column>
+			<el-table-column prop="name" label="病人姓名" > </el-table-column>
+			<el-table-column prop="drug_name" label="药品名"> </el-table-column> 
+			<el-table-column prop="number" label="数量"> </el-table-column>
+			<el-table-column prop="price" label="价格"> </el-table-column>
+			<el-table-column prop="note" label="备注"> </el-table-column>
+			<el-table-column prop="status" label="状态"> </el-table-column>
+			<el-table-column label="操作" width="200%">
+				<template slot-scope="scope">
+					<el-button v-if="deleteButton" @click="deleteEmployee(scope.row.drug_name,scope.row.name,scope.row.price,scope.row.id,scope.row.did,scope.row.price)" type="text" size="small">取药</el-button>
+				</template>
+			</el-table-column> 
+		</el-table>
+	<el-dialog title="发药" :visible.sync="showTotail" height="800px">
+		<template>
+		   库存数量：<el-button >{{numtem}}</el-button>
+  		</template>
+  		<template>
+  			请选择取药数量：<el-input-number v-model="drug.number" :min="1" :max="max" label="描述文字"></el-input-number>
+  		</template>
+	    <el-button @click="dialogVisible">取药</el-button>
+	    <el-button type="primary" @click="updataMess">取消</el-button>
+  		</span>
+	</el-dialog>
+	<template>
+		  <div class="block">
+		    <el-pagination
+		      @size-change="handleSizeChange"
+		      @current-change="handleCurrentChange"
+		      :current-Page="page.pageNum"
+		      :page-sizes="[6, 12, 18, 24]"
+		      :page-size="page.pageSize"
+		      layout="total, sizes, prev, pager, next, jumper"
+		      :total="page.total">
+		    </el-pagination>
+		  </div>
+	</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			//搜索条件
+			name:"",
+			item:"",
+			map:{
+				pro:{},
+				pageNum:"",
+				pageSize:""
+			},
+			numtem:0,
+			max:0,
+			list:[],
+			limit:{
+				page:1,
+				num:6
+			},
+			drug:{
+				name:"",
+				number:1,
+				price:0,
+				paname:"",
+				ddid:0,
+				did:0
+			},
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			
+			pageText:false,
+			deleteButton:true,
+			showTotail:false,
+		
+		},
+		
+		methods: {
+			insertPatient:function(){
+				console.log(this.name);
+				var _this = this;
+				$.ajax({
+					url: "/drug/soushuo",
+					type:"post",
+					data:JSON.stringify({name:_this.name,item:_this.item,pageNum:_this.limit.page,pageSize:_this.limit.num}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						console.log(data);
+						_this.list=data.obj.list;
+						for(var i=0;i<_this.list.length;i++){
+							if(_this.list[i].sex==1){
+								_this.list[i].sex="男";
+							}else{
+								_this.list[i].sex="女";
+							}
+						}
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+					}
+				})
+			},
+			 //取药,查询库存数量
+			deleteEmployee:function(id,paname,price,ddid,did,price){
+				this.showTotail=true;
+				this.drug.name=id;
+				this.drug.paname=paname;
+				this.drug.ddid=ddid;
+				this.drug.did=did;
+				this.drug.price=price;
+				var _this=this;
+				$.ajax({
+					url: "/drug/queryNum",
+					data:{name:id},
+					success: function(data) {
+						_this.numtem=data.obj.number;
+						_this.max=data.obj.number;
+						
+					}
+				})
+			},
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.insertPatient();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.insertPatient();
+			},
+			
+			
+		   //点击提交
+		    dialogVisible:function(){
+		    	var _this=this;
+		    	console.log(_this.drug);
+		    	$.ajax({
+					url: "/drug/insertRecord",
+					data:_this.drug,
+					success: function(data) {
+						if(data.code==200){
+							alert("取药成功");
+							_this.showTotail=false;
+							_this.insertPatient();
+						}
+					}
+				})
+		    },
+		    updataMess:function(){
+		    	this.showTotail=false;
+		    },
+		},
+	})
+</script>
+</body>
+</html>

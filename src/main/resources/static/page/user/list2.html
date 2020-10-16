@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>预约信息</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+    .el-row {
+    margin-bottom: 20px;
+    
+  }
+
+</style>
+
+<body>
+<div id="app">
+    <template>
+    <el-container> 
+			<el-header>请填写预约信息
+			</el-header> 
+	<el-container>
+        <section class="form_container">
+            <el-form :model="appo" :rules="rules" class="registerForm" ref="appo" label-width="80px">
+                <el-form-item label="姓名" prop="name">
+                    <el-input v-model="appo.name" placeholder="请输入姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="身份证" prop="idCard">
+                    <el-input v-model="appo.idCard" placeholder="请输入身份证" ></el-input>
+                </el-form-item>
+                <el-form-item label="电话" prop="phone">
+                    <el-input v-model="appo.phone" placeholder="请输入电话" ></el-input>
+                </el-form-item>
+                <el-form-item label="年龄" prop="age">
+                    <el-input v-model="appo.age" placeholder="请输入年龄" ></el-input>
+                </el-form-item>
+                 <el-form-item>
+               	 	请输入性别<el-radio v-model="appo.sex" label="1">男</el-radio>
+  					<el-radio v-model="appo.sex" label="2">女</el-radio>
+  				</el-form-item>
+                <el-form-item >
+                   请选择科室<el-select v-model="appo.department" placeholder="请选择科室" >
+			    	 <el-option
+				     	 v-for="item in depart"
+				     	 :key="item.id"
+				     	 :label="item.name"
+				     	 :value="item.name">
+				    	</el-option>
+			  			</el-select>
+                 </el-form-item>
+                 <el-form-item >
+                   请选择床位<el-select v-model="appo.beds" placeholder="请选择床位">
+		  			<el-option
+			     	 v-for="b in bedss"
+			     	 :key="b.id"
+			     	 :label="b.room"
+			     	 :value="b.room">
+			    	</el-option>
+		  			</el-select>
+                 </el-form-item>
+                 <el-form-item >
+                  <span class="demonstration">预约时间</span>
+		    	<el-date-picker
+		    	  v-model="appo.appointmentTime"
+		     	 type="date"
+		     	 placeholder="选择日期"
+		     	 value-format="yyyy-MM-dd HH:mm:ss"
+		     	  :picker-options="pickerOptions" >
+    			</el-date-picker>
+                 </el-form-item>
+                <el-form-item>
+                    <el-button type="primary"  class="submit_btn" @click="submitForm">提交</el-button>
+                    <el-button @click="resetForm('appo')">重置</el-button>
+                </el-form-item>
+            </el-form>
+        </section>
+</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			appo:{
+				name:"",
+				idCard:'',
+				age:'',
+				sex:'1',
+				department:"",
+				beds:"",
+				phone:"",
+				appointmentTime:""
+			},
+			depart:[],
+			bedss:[],
+			bed:"",
+			pickerOptions:{
+                 disabledDate(time) {
+                     return time.getTime() < Date.now()-8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
+                 }
+             },
+             rules: {
+                 // 要以数组形式展示
+                   name: [
+                     { required: true, message: "用户名不能为空", trigger: "change" },
+                     { min: 2, max: 30, message: "长度在 2 到 30 个字符", trigger: "blur" }
+                   ],
+                   idCard: [
+                	   { required: true, message: '请输入身份证',  trigger: 'change'}, 
+                	   { pattern:/^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)/, message: '请输入正确的身份证',trigger: 'blur'}
+                   ],
+                   phone: [
+                	   { required: true, message: '请输入手机号码',  trigger: 'change'}, 
+                	   { pattern:/^1[12345789]\d{9}$/, message: '请输入正确的手机号码',trigger: 'blur'}
+                   ],
+                   age: [
+                     { required: true, message: "请输入正确的数字", trigger: "blur" },
+                     { pattern:/^\d+(\.\d+)?$/, message: '请输入正确的数字', trigger: 'blur' }
+                   ],
+                 }
+        	},
+		created:function(){
+			this.selectBed();
+			this.select();
+			
+		},
+		methods: {
+			select:function(){
+				var _this = this;
+				$.ajax({
+					url: "/user/departmentMapper",
+					success: function(data) {
+						console.log(data.list)
+						_this.depart = data.list;
+					}
+				})
+			},
+			selectBed:function(){
+			
+				var _this = this;
+				$.ajax({
+					url: "/user/bed",
+					data:{depid:_this.depid},
+					success: function(data) {
+						console.log(data.list)
+						_this.bedss = data.list;
+					}
+				})
+			},
+			submitForm:function(){
+				this.appo.id=this.depid;
+				var _this = this;
+				console.log(this.time);
+				$.ajax({
+					url: "/user/app",
+					data:_this.appo,
+					success: function(data) {
+						if(data.code==200){
+							alert("提交成功");
+						}
+					}
+				})
+			},
+			//重置
+			resetForm :function(formName){
+
+				this.$refs[formName].resetFields();
+
+			}
+		},
+		//侦听部门id变化
+		watch:{
+			depid:{
+				deep:true,
+				handler:function(){
+					this.selectBed();
+				}
+			}
+		}
+	})
+</script>
+</body>
+</html>

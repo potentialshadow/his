@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>出院申请</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/axios-0.18.0.js" ></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script type="text/javascript" src="/js/qs.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<style>
+
+</style>
+
+<body>
+<div id="app">
+	<div class="block">
+	<el-row :gutter="20">
+	  <el-col :span="6"><el-input v-model="name" placeholder="请输入病人姓名" ></el-input></el-col>
+	<el-button type="primary" @click="insertPatient">查询在院病人</el-button>
+</el-row>
+	</div>
+		<el-table :data="list" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			<el-table-column fixed prop="id" label="病人编号" > </el-table-column> 
+			<el-table-column prop="name" label="病人姓名"> </el-table-column> 
+			<el-table-column prop="idCard" label="身份证"> </el-table-column>
+			<el-table-column prop="age" label="年龄"> </el-table-column>
+			<el-table-column prop="sex" label="性别"> </el-table-column>
+			<el-table-column prop="creationTime" label="住院时间"> </el-table-column>
+			<el-table-column label="操作" width="200%">
+				<template slot-scope="scope">
+					<el-button  @click="updateEmployee(scope.row.id,scope.row.name)" type="text" size="small">申请出院</el-button>
+				</template>
+			</el-table-column>
+		</el-table>
+	<el-dialog title="申请出院" :visible.sync="showTotail" height="800px">
+		已申请出院了，是否
+		 <el-button @click="delectupt">撤销</el-button>
+	    <el-button type="primary" @click="updataMess">取消</el-button>
+  		</span>
+	</el-dialog>
+	<template>
+		  <div class="block">
+		    <el-pagination
+		      @size-change="handleSizeChange"
+		      @current-change="handleCurrentChange"
+		      :current-Page="page.pageNum"
+		      :page-sizes="[6, 12, 18, 24]"
+		      :page-size="page.pageSize"
+		      layout="total, sizes, prev, pager, next, jumper"
+		      :total="page.total">
+		    </el-pagination>
+		  </div>
+	</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			//搜索条件
+			name:"",
+		
+			list:[],
+			brug:{},
+			limit:{
+				page:1,
+				num:6
+			},
+			mess:{
+				paname:"",
+				paid:0,
+			},
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			reselt:{},
+			pageText:false,
+			deleteButton:true,
+			showTotail:false,
+			
+		},
+		
+		methods: {
+			insertPatient:function(){
+				var _this = this;
+				$.ajax({
+					url: "/doc2/query",
+					type:"post",
+					data:JSON.stringify({name:_this.name,pageNum:_this.limit.page,pageSize:_this.limit.num}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						console.log(data);
+						_this.list=data.obj.list;
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+					}
+				})
+			},
+			
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.insertPatient();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.insertPatient();
+			},
+			//点击申请出院
+			updateEmployee:function(id,name){
+				this.mess.paid=id;
+				this.mess.paname=name;
+				var _this = this;
+				$.ajax({
+					url: "/doc2/queryMessById",
+					type:"post",
+					data:{id:id},
+					success: function(data) {
+						if(data.obj==null){
+							_this.updatemessa();
+						}else{
+							_this.reselt=data.obj;
+							_this.showTotail=true;
+						}
+					}
+				})
+			},
+			//申请出院
+			updatemessa:function(){
+				var _this=this;
+				$.ajax({
+					url: "/doc2/insertMessById",
+					data:_this.mess,
+					success: function(data) {
+						if(data.code==200){
+							alert("申请成功");
+						}
+					}
+				})
+			},
+			//撤销申请出院
+			delectupt:function(){
+				console.log(this.reselt);
+				var _this=this;
+				$.ajax({
+					url: "/doc2/deletd",
+					data:_this.reselt,
+					success: function(data) {
+						if(data.code==200){
+							alert("撤销成功");
+							_this.showTotail=false;
+						}
+					}
+				})
+			},
+			//更新
+			dialogVisible:function(){
+				var _this = this;
+				$.ajax({
+					url: "/drug/updataMessById",
+					data:_this.brug,
+					success: function(data) {
+						if(data.code==200){
+							alert("更新成功");
+							_this.showTotail=false;
+						}
+					}
+				})
+			},
+			
+			updataMess:function(){
+				this.showTotail=false;
+			},
+			insertmess:function(){
+				this.insertNursingDialogVisible=true;
+			},
+			insertMess:function(){
+				this.insertNursingDialogVisible=false;
+			},
+			
+		},
+	})
+</script>
+</body>
+</html>

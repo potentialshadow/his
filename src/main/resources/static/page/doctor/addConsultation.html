@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>会诊信息</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  
+
+  .main{
+  		width: 100%;
+		height: 700px;
+  }
+  .a-class{
+  	color: white;
+  	text-decoration: none;
+  	 color:cadetblue;
+  }
+</style>
+
+<body>
+<div id="app">
+	<el-form>
+		<el-button @click="showTotailall">会诊申请</el-button>
+	</el-form>
+	<el-tag>会诊详情</el-tag>
+	<el-table :data="Consultationlist.list" border style="width: 100%">
+			<el-table-column fixed prop="id" label="会诊编号"></el-table-column>
+			<el-table-column prop="paid" label="病人编号"></el-table-column>
+			<el-table-column prop="consultationStatus" label="会诊目的"> </el-table-column>
+			<el-table-column prop="note" label="会诊情况"> 
+			</el-table-column>
+			<el-table-column  label="会诊记录"> 
+					<template slot-scope="scope">
+						<el-tag type="warning" v-if="scope.row.patientStatus!=''">{{scope.row.patientStatus}}</el-tag>
+						<el-button v-if="scope.row.patientStatus==''" @click="showTotailallone(scope.row.id)"  type="text" size="small">录入会诊记录</el-button>
+					</template>
+			</el-table-column>
+	</el-table>
+	<el-button @click="up" type="text">上一页</el-button><el-button @click="down" type="text">下一页</el-button>
+	<el-form>
+	<el-dialog title="会诊申请" :visible.sync="showTotailplus" width="60%" center>
+	<el-form>
+		<el-input  v-model="Consultation.paid" placeholder="请输入病人编号"></el-input>
+		<el-input  v-model="Consultation.consultationStatus" placeholder="请输入会诊目的"></el-input>
+		<el-button @click="insertConsultation">提交</el-button>
+	</el-form>
+	</el-dialog>
+	<el-dialog title="会诊记录录入" :visible.sync="showTotail" width="60%" center>
+		<el-input  v-model="patientStatus" placeholder="请录入信息"></el-input>
+		<el-button @click="changePatientStatus">提交</el-button>
+	</el-dialog>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			showTotail:false,
+			showTotailplus:false,
+			id:"",
+			patientStatus:"",
+			Consultation:{
+				id:"",
+				eid:"",
+				paid:"",
+				consultationStatus:"",
+				note:"",
+				patientStatus:""
+			},
+			Consultationlist:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: 1,
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				list:[]
+			},
+			
+		},
+		methods: {
+			
+			up:function(){
+				var this1=this;
+				if(this1.Consultationlist.pageNum>1){
+					this1.Consultationlist.pageNum=this1.Consultationlist.pageNum-1;
+					this1.selectConsultation();
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			down:function(){
+				var this1=this;
+				
+				if(this1.Consultationlist.pageNum==this1.Consultationlist.pages){
+					alert("已经是第最后1页了")
+				}else{
+					this1.Consultationlist.pageNum=this1.Consultationlist.pageNum+1;
+					this1.selectConsultation();
+				}
+			},
+			
+			changePatientStatus:function(){
+				var this1=this;
+				
+				$.ajax({
+					url:"/doctor/changePatientStatus",
+				    data: {
+				    	id:this1.id,
+				    	patientStatus:this1.patientStatus
+				    },
+					success:function(data){
+						console.log(data)
+						if(data.message=="添加成功"){
+							alert("添加成功")
+							this1.selectConsultation();
+						}
+					}
+				})
+			},
+			
+			insertConsultation:function(){
+				var this1=this;
+				
+				$.ajax({
+					url:"/doctor/insertConsultation",
+				    data: this1.Consultation,
+					success:function(data){
+						console.log(data)
+						if(data.message=="新增成功"){
+							alert("新增成功")
+							this1.selectConsultation();
+						}
+					}
+				})
+				
+			},
+			
+			
+			selectConsultation:function(){
+				var this1=this;
+				$.ajax({
+					url:"/doctor/selectConsultation",
+				    data: {
+				    	pid:this1.pid,
+				    	pagenumber:this1.Consultationlist.pageNum
+				    },
+					success:function(data){
+						console.log(data)
+						if(data.message=="查询成功"){
+							this1.Consultationlist=data.obj
+							this1.Consultationlist.list=data.obj.list;
+						}
+					}
+				})
+			},
+			
+			
+			showTotailall:function(){
+				this.showTotailplus=true
+			},
+			showTotailallone:function(id){
+				this.id=id;
+				this.showTotail=true
+			},
+			
+			
+		},
+		created:function(){
+			this.selectConsultation();
+		},
+		watch:{
+			
+		}
+	})
+</script>
+</body>
+</html>

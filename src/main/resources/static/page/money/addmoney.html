@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>首页</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  
+
+  .main{
+  		width: 100%;
+		height: 700px;
+  }
+  .a-class{
+  	color: white;
+  	text-decoration: none;
+  	 color:cadetblue;
+  }
+</style>
+
+<body>
+<div id="app">
+	<el-container > 
+			<el-header>预交款
+			</el-header> 
+		<el-container>
+	
+		<template>  
+		<el-col :span="12" :offset="6" >
+		姓名<el-input v-model="appo.name" placeholder="请输入姓名" ></el-input>
+		身份证号<el-input v-model="appo.idCard" placeholder="请输入身份证" :span="1"></el-input>
+		请输入性电话<el-input v-model="appo.phone" placeholder="请输入联系电话" :span="1"></el-input>
+    	请输入预交金额<el-input v-model="appo.money" placeholder="请输入预交金额" :span="1"></el-input>
+    	<input type="submit" value="提交" @click="insertMoney">
+    	</el-col>
+		</template>
+  </el-select>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			appo:{
+				name:"",
+				idCard:"",
+				phone:"",
+				money:""
+			}
+		},
+		methods: {
+			insertMoney:function(){
+				var data=this.appo;
+				$.ajax({
+					url:"/money",
+					type:"post",
+					data:data,
+					success:function(data){
+						if(data.message="缴费成功"){
+							alert("缴费成功")
+						}
+					}
+				})
+			}
+		},
+	})
+</script>
+</body>
+</html>

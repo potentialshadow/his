@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>人事管理首页</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<script type="text/javascript" src="/js/index.js"></script>
+<style type="text/css">
+	el-table-column{
+		text-align: center;
+	}
+</style>
+</head>
+<body>
+	<div id="app">
+		<el-table :data="list" border style="width: 100%">
+			<el-table-column fixed prop="id" label="编号"></el-table-column>
+			<el-table-column prop="detail" label="详情"></el-table-column>
+			<el-table-column prop="time" label="时间"> </el-table-column>
+			<el-table-column prop="money" label="剩余金额"> </el-table-column>
+			<el-table-column prop="status=1?'充值':'消费'" label="状态"> </el-table-column>
+		</el-table>
+	</div>
+	<script type="text/javascript">
+		new Vue({
+			el:"#app",
+			data:{
+				list:[],
+				deleteButton:false,
+				updateButton:false,
+				insertButton:false
+			},
+			created:function(){
+				this.selectEmployees();
+				this.selectButton();
+			},
+			methods:{
+				selectEmployees:function(){
+					var _this=this;
+					$.ajax({
+						url:"/employees/selectEmployees",
+						success:function(data){
+							console.log(data)
+							if(data.code=="200"){
+								_this.list=data.list;
+							}
+						}
+					})
+				},
+				selectButton:function(){
+					var _this=this;
+					var href=location.href;
+					var pid=href.split("?")[1].split("=")[1];
+					$.ajax({
+						url:"/user/button",
+						data:{pid:pid},
+						success:function(data){
+							if(data.code=="200"){
+								$(data.list).each(function(){
+									if(this.name=="删除课程"){
+										_this.deleteButton=true;
+									}
+									if(this.name=="修改课程"){
+										_this.updateButton=true;
+									}
+									if(this.name=="新增课程"){
+										_this.insertButton=true;
+									}
+								})
+							}
+						}
+					})
+				},
+				deleteCourse:function(course){
+					var _this=this;
+					$.ajax({
+						url:"/course/deleteCourse",
+						data:{id:course.id},
+						success:function(data){
+							if(data.code=="200"){
+								alert("删除成功");
+								_this.selectCourse();
+							}
+						}
+					})
+				}
+			}
+		});
+	</script>
+</body>
+</html>

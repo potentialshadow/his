@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>药品信息管理</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/axios-0.18.0.js" ></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script type="text/javascript" src="/js/qs.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<style>
+
+ </style>
+
+<body>
+<div id="app">
+	<div class="block">
+	<el-row :gutter="20">
+	  <el-col :span="6"><el-input v-model="name" placeholder="请输入药品名" ></el-input></el-col>
+	<el-button type="primary" @click="insertPatient">查询</el-button>
+	  <el-button type="info" @click="insertmess">新增药品</el-button>
+	</el-row>
+	</div>
+		<el-table :data="list" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			<el-table-column fixed prop="id" label="药品编号" > </el-table-column> 
+			<el-table-column prop="drugName" label="药品名"> </el-table-column> 
+			<el-table-column prop="number" label="库存数量"> </el-table-column>
+			<el-table-column prop="price" label="价格"> </el-table-column>
+			<el-table-column label="操作" width="200%">
+				<template slot-scope="scope">
+					<el-button  @click="updateEmployee(scope.row.id)" type="text" size="small">修改药品信息</el-button>
+					<el-button  @click="deleteEmployee(scope.row.id)" type="text" size="small">删除药品信息</el-button>
+				</template>
+			</el-table-column>
+		</el-table>
+	<el-dialog title="修改药品信息" :visible.sync="showTotail" height="800px">
+	 <el-form ref="brug" :model="brug" label-width="80px">
+		 <el-form-item label="药品名字">
+  			  	<el-input v-model="brug.drugName"></el-input>
+  		</el-form-item>
+  		 <el-form-item label="药品价格">
+  			  	<el-input v-model="brug.price"></el-input>
+  		</el-form-item>
+  		<el-form-item label="药品库存">
+  			  	<el-input v-model="brug.number"></el-input>
+  		</el-form-item>
+  		<el-button @click="dialogVisible">更新</el-button>
+	    <el-button type="primary" @click="updataMess">取消</el-button>
+  		</el-form>
+	</el-dialog>
+	<el-dialog title="新增药品" :visible.sync="insertNursingDialogVisible" width="30%">
+  			<el-form ref="mess" :model="brug" label-width="80px">
+		 <el-form-item label="药品名字">
+  			  	<el-input v-model="mess.drugName"></el-input>
+  		</el-form-item>
+  		 <el-form-item label="药品价格">
+  			  	<el-input v-model="tatol"></el-input>
+  		</el-form-item>
+  		<el-form-item label="药品库存">
+  			  	<el-input v-model="itemnum"></el-input>
+  		</el-form-item>
+  		<el-button @click="insedialogVisible">新增</el-button>
+	    <el-button type="primary" @click="insertMess">取消</el-button>
+  		</el-form>
+	</el-dialog>
+	<template>
+		  <div class="block">
+		    <el-pagination
+		      @size-change="handleSizeChange"
+		      @current-change="handleCurrentChange"
+		      :current-Page="page.pageNum"
+		      :page-sizes="[6, 12, 18, 24]"
+		      :page-size="page.pageSize"
+		      layout="total, sizes, prev, pager, next, jumper"
+		      :total="page.total">
+		    </el-pagination>
+		  </div>
+	</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			//搜索条件
+			name:"",
+			tatol:"",
+			itemnum:"",
+			list:[],
+			brug:{},
+			limit:{
+				page:1,
+				num:6
+			},
+			mess:{
+				drugName:"",
+				price:0,
+				number:0
+			},
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			
+			pageText:false,
+			deleteButton:true,
+			showTotail:false,
+			insertNursingDialogVisible:false
+		},
+		
+		methods: {
+			insertPatient:function(){
+				var _this = this;
+				$.ajax({
+					url: "/drug/queryMess",
+					type:"post",
+					data:JSON.stringify({name:_this.name,pageNum:_this.limit.page,pageSize:_this.limit.num}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						console.log(data);
+						_this.list=data.obj.list;
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+					}
+				})
+			},
+			
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.insertPatient();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.insertPatient();
+			},
+			//修改药品信息
+			updateEmployee:function(id){
+				this.showTotail=true;
+				var _this = this;
+				$.ajax({
+					url: "/drug/queryMessById",
+					type:"post",
+					data:{id:id},
+					success: function(data) {
+						_this.brug=data.obj;
+					}
+				})
+			},
+			//更新
+			dialogVisible:function(){
+				var _this = this;
+				$.ajax({
+					url: "/drug/updataMessById",
+					data:_this.brug,
+					success: function(data) {
+						if(data.code==200){
+							alert("更新成功");
+							_this.showTotail=false;
+						}
+					}
+				})
+			},
+			//删除
+			deleteEmployee:function(id){
+				var _this = this;
+				$.ajax({
+					url: "/drug/deleteMessById",
+					data:{id:id},
+					success: function(data) {
+						if(data.code==200){
+							alert("删除成功");
+							_this.insertPatient;
+						}
+					}
+				})
+			},
+			updataMess:function(){
+				this.showTotail=false;
+			},
+			insertmess:function(){
+				this.insertNursingDialogVisible=true;
+			},
+			insertMess:function(){
+				this.insertNursingDialogVisible=false;
+			},
+			//新增
+			insedialogVisible:function(){
+				this.mess.price=this.tatol;
+				this.mess.number=this.itemnum;
+				var _this = this;
+				$.ajax({
+					url: "/drug/insertMess",
+					data:_this.mess,
+					success: function(data) {
+						if(data.code==200){
+							alert("新增成功");
+							_this.insertNursingDialogVisible=false;
+							_this.insertPatient();
+						}
+					}
+				})
+			}
+		},
+	})
+</script>
+</body>
+</html>

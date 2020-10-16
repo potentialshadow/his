@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>护理记录</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<!-- 引入组件库 -->
+<script src="/js/index.js"></script>
+</head>
+<body>
+	<div id="app">
+		<el-row>
+		  <el-button type="primary" @click="insertNursing">新增记录</el-button>
+		</el-row>
+		<template>
+			<el-table :data="nursings" border style="width: 100%"> 
+			<el-table-column fixed prop="name" label="护士姓名"></el-table-column> 
+			<el-table-column prop="pid" label="病人编号"> </el-table-column>
+			<el-table-column prop="pname" label="病人姓名"> </el-table-column>
+			<el-table-column prop="nursing_type" label="护理类型"> </el-table-column> 
+			<el-table-column prop="nursing_time" label="护理时间"> </el-table-column>
+			<el-table-column prop="nursing_record" label="护理记录"> </el-table-column> 
+			<el-table-column prop="status" label="类型"> </el-table-column> 
+			<el-table-column label="操作">
+			<template slot-scope="scope">
+				<el-button  @click="deleteNursing(scope.row.id)" type="text" size="small">删除记录</el-button>
+			</template>
+			</el-table-column>
+  			</el-table>
+  			</template>
+  			<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+		</template>
+		<el-dialog title="提示" :visible.sync="insertNursingDialogVisible" width="30%">
+  			 <el-form ref="form" :model="nursing" label-width="80px">
+  			 <el-form-item label="病人编号">
+  			  	<el-input v-model="nursing.paid"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="护理类型">
+  			  	<el-input v-model="nursing.nursingType"></el-input>
+  			</el-form-item>
+  			<!--  <el-form-item label="护理时间">
+  			  	<el-input v-model="patient.phone"></el-input>
+  			</el-form-item> -->
+  			<el-form-item label="护理日期">
+			    <el-col>
+			      <el-date-picker type="date" placeholder="选择日期" v-model="nursing.nursingTime"  value-format="yyyy-MM-dd HH:mm:ss" style="width: 100%;">
+			      </el-date-picker>
+			    </el-col>
+			  </el-form-item>
+  			<el-form-item label="护理记录">
+  			  	<el-input v-model="nursing.nursingRecord"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="护理类型">
+		     <el-select v-model="nursing.status" placeholder="请选择护理类型" >
+	    	 	<el-option label="一般护理记录" value="一般护理记录"></el-option>
+      			<el-option label="危重症护理记录" value="危重症护理记录"></el-option>
+      			<el-option label="特殊护理记录" value="特殊护理记录"></el-option>
+	    	</el-select>
+		  </el-form-item>
+		  </el-form>
+    		<el-button @click="insertNursingDialogVisible = false">取 消</el-button>
+    		<el-button type="primary" @click="insert">提交</el-button>
+ 			</span>
+	</el-dialog>
+	</template>
+  	</div>
+	<script type="text/javascript">
+	var vm=new Vue({
+		el:'#app',
+		data:{
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+			nursing:{
+				
+				
+			},
+			nursings:[],
+			insertNursingDialogVisible:false,
+		},
+		created:function(){
+			this.selectNursings();
+			//this.selectButton();
+		},
+		methods:{
+			 handleSizeChange(val) {
+				 var _this=this;
+			      _this.limit.pageSize=val;
+			      _this.selectNursings();
+			      },
+			      handleCurrentChange(val) {
+			    	  var _this=this;
+			    	  _this.limit.pageNum=val;
+				      _this.selectNursings();
+			      },
+			  selectNursings:function(){
+				var _this=this;
+				$.ajax({
+					url:"/nursing",
+					data:{pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+					success:function(data){
+						if(data.code=="200"){
+							_this.nursings=data.obj.list;
+							_this.page.total=data.obj.total;
+							_this.page.pageNum=data.obj.pageNum;
+							_this.page.pageSize=data.obj.pageSize;
+						}
+						
+					}
+				});
+			},
+			/* selectButton:function(){
+				var _this=this;
+				var href=location.href;
+				var pid=href.split("?")[1].split("=")[1];
+				$.ajax({
+					url:"/menu",
+					data:{pid:pid},
+					success:function(data){
+						if(data.code=="200"){
+							for(var i=0;i<data.list.length;i++){
+								if(data.list[i].name=="信息录入"){
+									_this.updateUserRoleButton=true;
+								}
+							}
+						}
+						
+					}
+				})
+			}, */
+			insertNursing:function(){
+				var _this=this;
+				_this.insertNursingDialogVisible=true;
+			},
+			insert:function(){
+				var _this=this;
+				$.ajax({
+					url:"/nursing",
+					type:"post",
+					data:_this.nursing,
+					success:function(data){
+						if(data.code=="200"){
+							alert("新增成功");
+							_this.insertNursingDialogVisible=false;
+							location.href="/page/nurse/nursing.html";
+						}
+					}
+				})
+			},
+			deleteNursing:function(id){
+				var _this=this;
+				$.ajax({
+					url:"/nursing",
+					type:"delete",
+					data:{id:id},
+					success:function(data){
+						if(data.code=="200"){
+							alert("删除成功");
+							location.href="/page/nurse/nursing.html";
+						}
+					}
+				})
+			}
+		},
+	})
+	</script>
+</body>
+</html>

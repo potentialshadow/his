@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>指派经治人员</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<!-- 引入组件库 -->
+<script src="/js/index.js"></script>
+</head>
+<body>
+	<div id="app">
+		<template>
+			<el-table :data="patients" border style="width: 100%"> 
+			<el-table-column fixed prop="id" label="病人编号"></el-table-column> 
+			<el-table-column prop="name" label="姓名"> </el-table-column>
+			<el-table-column prop="phone" label="电话号码"> </el-table-column> 
+			<el-table-column prop="sex" label="性别"> </el-table-column>
+			<el-table-column prop="age" label="年龄"> </el-table-column> 
+			<el-table-column prop="department" label="科室"> </el-table-column> 
+			<el-table-column prop="beds" label="床位"> </el-table-column> 
+			<el-table-column prop="ename" label="经治医生"></el-table-column> 
+			<el-table-column prop="emname" label="经治护士"></el-table-column> 
+			<el-table-column prop="creationTime" label="入院时间"> </el-table-column> 
+			<el-table-column label="操作">
+			<template slot-scope="scope">
+				<el-button  @click="insertdoctor(scope.row.id)" type="text" size="small">指派医生</el-button>
+				<el-button  @click="insertnurse(scope.row.id)" type="text" size="small">指派护士</el-button>
+			</template>
+			</el-table-column>
+  			</el-table>
+  			<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+		</template>
+  			<el-dialog title="提示" :visible.sync="insertbedsDialogVisible" width="30%">
+  			 <el-form>
+		  	<template>
+			  <el-radio-group v-model="radio">
+			    <el-radio  v-for="item in employees" :label="item.id">{{item.name}}</el-radio>
+			  </el-radio-group>
+			</template>
+			</el-form>
+    		<el-button @click="insertbedsDialogVisible = false">取 消</el-button>
+    		<el-button type="primary" @click="insertempl">提交</el-button>
+ 			</span>
+			</el-dialog>
+			</template>
+	</div>
+	<script type="text/javascript">
+	var vm=new Vue({
+		el:'#app',
+		data:{
+			patient:{},
+			radio:{},
+			patients:[],
+			employees:[],
+			pid:0,
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+			moneyDetail:[],
+			insertbedsDialogVisible:false,
+		},
+		created:function(){
+			this.selectPatients();
+		},
+		methods:{
+			insertempl:function(){
+				var _this=this;
+				console.log(_this.radio);
+				$.ajax({
+					url:"/patient/insertEmp",
+					data:{id:_this.radio,paid:_this.pid},
+					success:function(data){
+						if(data.code=="200"){
+							alert("指派成功");
+							_this.insertbedsDialogVisible=false;
+							location.href="/page/nurse/assign.html"
+						}
+					}
+				});
+			},
+			insertdoctor:function(id){
+				var _this=this;
+				_this.insertbedsDialogVisible=true;
+				$.ajax({
+					url:"/employees/selectById",
+					data:{id:id},
+					success:function(data){
+						if(data.code=="200"){
+							_this.employees=data.list;
+							_this.pid=id;
+						}
+					}
+				});
+			},
+			insertnurse:function(id){
+				var _this=this;
+				_this.insertbedsDialogVisible=true;
+				$.ajax({
+					url:"/employees/selectNurById",
+					data:{id:id},
+					success:function(data){
+						if(data.code=="200"){
+							_this.employees=data.list;
+							_this.pid=id;
+						}
+					}
+				});
+			},
+			handleSizeChange(val) {
+				 var _this=this;
+			      _this.limit.pageSize=val;
+			      _this.selectPatients();
+			      },
+			      handleCurrentChange(val) {
+			    	  var _this=this;
+			    	  _this.limit.pageNum=val;
+				      _this.selectPatients();
+			      },
+			   selectPatients:function(){
+				var _this=this;
+				$.ajax({
+					url:"/patient/selectPatientByStatus",
+					data:{pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+					success:function(data){
+						if(data.code=="200"){
+							_this.patients=data.obj.list;
+							for(var i=0;i<_this.patients.length;i++){
+								if(_this.patients[i].sex==1){
+									_this.patients[i].sex="男";
+								}else{
+									_this.patients[i].sex="女";
+								}
+								if(_this.patients[i].beds=="0"){
+									_this.patients[i].beds="未安排床位"
+								}
+								if(_this.patients[i].ename==null){
+									_this.patients[i].ename="未指派医生"
+								}
+								if(_this.patients[i].emname==null){
+									_this.patients[i].emname="未指派护士"
+								}
+							}
+							_this.page.total=data.obj.total;
+							_this.page.pageNum=data.obj.pageNum;
+							_this.page.pageSize=data.obj.pageSize;
+						}
+						
+					}
+				});
+			},
+		},
+	})
+	</script>
+</body>
+</html>

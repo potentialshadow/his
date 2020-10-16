@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>床位处理</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<!-- 引入组件库 -->
+<script src="/js/index.js"></script>
+</head>
+<body>
+	<div id="app">
+		<template>
+			<el-table :data="patients" border style="width: 100%"> 
+			<el-table-column fixed prop="id" label="病人编号"></el-table-column> 
+			<el-table-column prop="name" label="姓名"> </el-table-column>
+			<el-table-column prop="phone" label="电话号码"> </el-table-column> 
+			<el-table-column prop="sex" label="性别"> </el-table-column>
+			<el-table-column prop="age" label="年龄"> </el-table-column> 
+			<el-table-column prop="department" label="科室"> </el-table-column> 
+			<el-table-column prop="beds" label="床位"> </el-table-column> 
+			<el-table-column prop="status" label="状态"> </el-table-column> 
+			<el-table-column label="操作">
+			<template slot-scope="scope">
+				<el-button  @click="stopbeds(scope.row.id,scope.row.status)" type="text" size="small">停止床位</el-button>
+				<el-button  @click="selectbeds(scope.row.department,scope.row.id,scope.row.status)" type="text" size="small">安排床位</el-button>
+			</template>
+			</el-table-column>
+  			</el-table>
+  			<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+		</template>
+  			<el-dialog title="提示" :visible.sync="insertbedsDialogVisible" width="30%">
+		  	<template>
+			  <el-radio-group v-model="radio">
+			    <el-radio  v-for="item in bedss" :label="item.room">{{item.room}}</el-radio>
+			  </el-radio-group>
+			</template>
+    		<el-button @click="insertbedsDialogVisible = false">取 消</el-button>
+    		<el-button type="primary" @click="insertBeds">提交</el-button>
+ 			</span>
+			</el-dialog>
+			</template>
+	</div>
+	<script type="text/javascript">
+	var vm=new Vue({
+		el:'#app',
+		data:{
+			patient:{
+				name:"",
+				idCard:"",
+				phone:"",
+				sex:"",
+				age:"",
+				department:'',
+				beds:""
+			},
+			radio:0,
+			patients:[],
+			pid:0,
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+			bedss:[],
+			appointments:[],
+			insertPaientButton:false,
+			insertbedsDialogVisible:false,
+			
+		},
+		created:function(){
+			this.selectPatients();
+			//this.selectButton();
+		},
+		methods:{
+			 handleSizeChange(val) {
+				 var _this=this;
+			      _this.limit.pageSize=val;
+			      _this.selectAppointments();
+			      },
+			      handleCurrentChange(val) {
+			    	  var _this=this;
+			    	  _this.limit.pageNum=val;
+				      _this.selectAppointments();
+			      },
+			selectPatients:function(){
+				var _this=this;
+				$.ajax({
+					url:"/patient",
+					data:{pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+					success:function(data){
+						if(data.code=="200"){
+							_this.patients=data.obj.list;
+							for(var i=0;i<_this.patients.length;i++){
+								if(_this.patients[i].sex==1){
+									_this.patients[i].sex="男";
+								}else{
+									_this.patients[i].sex="女";
+								}
+								if(_this.patients[i].beds=="0"){
+									_this.patients[i].beds="未安排床位"
+								}
+							}
+							_this.page.total=data.obj.total;
+							_this.page.pageNum=data.obj.pageNum;
+							_this.page.pageSize=data.obj.pageSize;
+						}
+						
+					}
+				});
+			},
+			
+			stopbeds:function(id,status){
+				var _this=this;
+				if(status=="在院"){
+					$.ajax({
+						url:"/patient/updateStatus",
+						data:{id:id},
+						success:function(data){
+							if(data.code=="200"){
+								alert("操作成功");
+								location.href="/page/nurse/beds.html";
+							}
+						}
+					});
+				}else{
+					alert("该病人已出院");
+				}
+				
+			},
+			selectbeds:function(depart,id,status){	;
+				var _this=this;
+				_this.pid=id;
+				if(status=="在院"){
+					$.ajax({
+						url:"/beds/selectDepart",
+						data:{depart:depart},
+						success:function(data){
+							if(data.code=="200"){
+								_this.bedss=data.list;	
+								_this.insertbedsDialogVisible=true;
+							}
+						}
+					})
+				}else{
+					alert("该病人已出院");
+				}
+				
+			},
+			insertBeds:function(){
+				var _this=this;
+				$.ajax({
+					url:"/patient/updatePatientBeds",
+					type:"put",
+					data:{pid:_this.pid,room:_this.radio},
+					success:function(data){
+						if(data.code=="200"){
+							alert("操作成功");
+							_this.insertbedsDialogVisible=false;
+							location.href="/page/nurse/beds.html";
+						}
+					}
+				})
+			}
+		},
+	})
+	</script>
+</body>
+</html>

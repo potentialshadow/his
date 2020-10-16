@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>首页</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  
+
+  .main{
+  		width: 100%;
+		height: 700px;
+  }
+  .a-class{
+  	color: white;
+  	text-decoration: none;
+  	 color:cadetblue;
+  }
+</style>
+
+<body>
+<div id="app">
+	<el-container > 
+			<el-header>出院结算
+			</el-header> 
+		<el-container>
+		<template>  
+		<el-col :span="16" :offset="2" >
+		请输入身份证号<el-input v-model="cardId" placeholder="请输入病人身份证号" ></el-input>
+    	<input type="submit" value="查询" @click="selectMoney">
+    	<el-form>
+    		剩余金额
+    		<el-input v-model="patient.money"  >
+    		
+    	</el-form>
+    	<el-table :data="page.list" border style="width: 100%">
+			<el-table-column fixed prop="id" label="编号"></el-table-column>
+			<el-table-column prop="detail" label="详情"></el-table-column>
+			<el-table-column prop="time" label="时间"> </el-table-column>
+			<el-table-column prop="money" label="剩余金额"> </el-table-column>
+			<el-table-column prop="status" label="状态"> </el-table-column>
+		</el-table>
+ 		 <el-button @click="up">上一页</el-button><el-button @click="down">下一页</el-button>
+ 		 <el-button @click="state">结算</el-button>
+    	</el-col>
+    		
+		</template>
+		<el-col :span="7" :offset="2" >
+		<el-form ref="form" :model="patient" label-width="80px">
+  			 <el-form-item label="病人姓名">
+  			  	<el-input v-model="patient.name"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="身份证号码">
+  			  	<el-input v-model="patient.idCard"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="电话号码">
+  			  	<el-input v-model="patient.phone"></el-input>
+  			</el-form-item>
+  			<el-form-item label="性别">
+			    <el-input v-model="patient.sex"></el-input>
+		  	</el-form-item>
+		  	 <el-form-item label="年龄">
+  			  	<el-input v-model="patient.age"></el-input>
+  			</el-form-item>
+  			<el-form-item label="入院时间">
+  			  	<el-input v-model="patient.creationTime"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="科室">
+		     <el-input v-model="patient.department"  >
+	    	</el-input>
+		  </el-form-item>
+		  	</el-form-item>
+  			 <el-form-item label="床位">
+		     <el-input v-model="patient.beds">
+	    	</el-input>
+		  </el-form-item>
+		  </el-form>
+		  </el-col>
+  </el-select>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			cardId:"",
+			patient:{
+				id:"",
+				name:"",
+				idCard:"",
+				age:"",
+				phone:"",
+				money:"",
+				sex:"",
+				department:"",
+				beds:"",
+				status:"",
+				creationTime:"",
+				dateil:""
+			},
+			
+			page:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: "",
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				list:[]
+			}
+		},
+		methods: {
+			
+			state:function(){
+				var this1=this;
+				$.ajax({
+					url:"/money/state",
+					data:{
+						pid:this1.patient.id,
+						money:this1.patient.money		
+					},
+					success:function(data){
+						if(data.message=="结算成功"){
+							alert("结算成功")
+							this1.page.list=[];
+							this1.cardId="";
+							this1.patient="";
+						}
+					}
+				})
+			},
+			
+			
+			up:function(){
+				var this1=this;
+				if(this1.page.pageNum>1){
+					this1.page.pageNum=this1.page.pageNum-1;
+					this1.selectMoney();
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			down:function(){
+				var this1=this;
+				if(this1.page.pageNum==this1.page.pages){
+					alert("已经是第最后1页了")
+					
+				}else{
+					this1.page.pageNum=this1.page.pageNum+1;
+					this1.selectMoney();
+				}
+			},
+			
+			selectMoney:function(){
+				var this1=this;
+				
+				$.ajax({
+					url:"/money/page",
+					data:{
+						cardId:this1.cardId,
+						pagenumber:this1.page.pageNum		
+					},
+					success:function(data){
+						if(data.code=200){
+							console.log(data)
+							this1.patient=data.obj.patient;
+							if(this1.patient.sex==1){
+								this1.patient.sex='男';
+							}else{
+								this1.patient.sex='女';
+							}
+							this1.page=data.obj.list;
+							for(var i=0;i<this1.page.list.length;i++){
+								if(this1.page.list[i].status==1){
+									this1.page.list[i].status='存入';
+								}else{
+									this1.page.list[i].status='消费';
+								}
+							}
+							
+						}
+					}
+				})
+			}
+		},
+		watch:{
+		
+		}
+	})
+</script>
+</body>
+</html>

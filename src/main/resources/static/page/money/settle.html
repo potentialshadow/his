@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>首页</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  
+
+  .main{
+  		width: 100%;
+		height: 700px;
+  }
+  .a-class{
+  	color: white;
+  	text-decoration: none;
+  	 color:cadetblue;
+  }
+</style>
+
+<body>
+<div id="app">
+	
+		<el-form>
+		<el-button @click="wuhu">根据身份证号查询</el-button>
+		
+		<el-button @click="selectPatientByStatus('在院')">在院病人</el-button>
+		
+		<el-button @click="selectPatientByStatus('出院')">出院病人</el-button>
+		</el-form>
+		<template>  
+		<el-dialog title="请输入身份证号查询" :visible.sync="showTotail" width="60%" center>
+			请输入身份证号<el-input v-model="cardId" placeholder="请输入病人身份证号" ></el-input>
+	    	<input type="submit" value="查询" @click="selectMoney">
+	    	<el-table :data="page.list" border style="width: 100%">
+				<el-table-column fixed prop="id" label="编号"></el-table-column>
+				<el-table-column prop="detail" label="详情"></el-table-column>
+				<el-table-column prop="time" label="时间"> </el-table-column>
+				<el-table-column prop="money" label="剩余金额"> </el-table-column>
+				<el-table-column prop="status" label="状态"> </el-table-column>
+			</el-table>
+			<el-button @click="up" type="text">上一页</el-button><el-button @click="down" type="text">下一页</el-button>	
+		</el-dialog>
+		
+		<el-table :data="patientlist.list" border style="width: 100%">
+				<el-table-column fixed prop="id" label="编号"></el-table-column>
+				<el-table-column prop="name" label="姓名"></el-table-column>
+				<el-table-column prop="idCard" label="身份证号"> </el-table-column>
+				<el-table-column prop="age" label="年龄"> </el-table-column>
+				<el-table-column prop="sex" label="性别"> </el-table-column>
+				<el-table-column prop="department" label="科室"> </el-table-column>
+				<el-table-column prop="beds" label="床位"> </el-table-column>
+				<el-table-column prop="phone" label="电话"> </el-table-column>
+				<el-table-column prop="status" label="状态"> </el-table-column>
+				<el-table-column prop="creationTime" label="入院时间"> </el-table-column>
+				<el-table-column prop="dateil" label="症状"> </el-table-column>
+				<el-table-column prop="money" label="余额"> </el-table-column>
+				<el-table-column  label="操作"> 
+					<template slot-scope="scope">
+						<el-button  @click="qifei(scope.row.idCard,scope.row.id)"  type="text" size="small">查看详情</el-button>
+					</template>
+				</el-table-column>
+		</el-table>	
+		<el-form>
+				<el-button @click="patientpageup" type="text">上一页</el-button><el-button @click="patientpagedown" type="text">下一页</el-button>
+	  	</el-form>
+	  	
+	  	<el-dialog title="费用详情" :visible.sync="showTotailplus" width="60%" center>
+	  		<el-button @click="selectmoneyBystatus(2,'true')" type="text">只看支出</el-button><el-button @click="selectmoneyBystatus(1,'true')" type="text">只看存入</el-button>
+	    	<el-table :data="page.list" border style="width: 100%">
+				<el-table-column fixed prop="id" label="编号"></el-table-column>
+				<el-table-column prop="detail" label="详情"></el-table-column>
+				<el-table-column prop="time" label="时间"> </el-table-column>
+				<el-table-column prop="money" label="剩余金额"> </el-table-column>
+				<el-table-column prop="status" label="状态"> </el-table-column>
+			</el-table>
+			<el-button @click="up" type="text">上一页</el-button><el-button @click="down" type="text">下一页</el-button>	
+		</el-dialog>
+		</template>
+  </el-select>
+		
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			pid:"",
+			showTotailplus:false,
+			showTotail:false,
+			cardId:"",
+			status:"",
+			moneystatus:"",
+			paymoney:"",
+			getmoney:"",
+			patientlist:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: "",
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				list:[]
+			},
+			
+			page:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: "",
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				list:[]
+			}
+		},
+		methods: {
+			
+			selectmoneyBystatus:function(status,flag){
+				var this1=this;
+				if(flag=="true"){
+					this1.page.pageNum=1;
+					flag=false;
+				}
+				this.moneystatus=status
+				$.ajax({
+					url:"/money/status",
+					data:{
+						pid:this.pid,
+						pagenumber:this1.page.pageNum,
+						status:this.moneystatus
+					},
+					success:function(data){
+						console.log(data.obj.list)
+						if(data.code=200){
+							this1.page=data.obj.list;
+							for(var i=0;i<this1.page.list.length;i++){
+								if(this1.page.list[i].status==1){
+									this1.page.list[i].status='存入';
+								}else{
+									this1.page.list[i].status='消费';
+								}
+							}
+						}
+					}
+				})
+			},
+			
+			selectPatientByPid:function(){
+				var this1=this;
+				$.ajax({
+					url:"/money/page",
+					data:{
+						cardId:this.cardId,
+						pagenumber:this1.page.pageNum		
+					},
+					success:function(data){
+						if(data.code=200){
+							this1.page=data.obj.list;
+							for(var i=0;i<this1.page.list.length;i++){
+								if(this1.page.list[i].status==1){
+									this1.page.list[i].status='存入';
+								}else{
+									this1.page.list[i].status='消费';
+								}
+							}
+						}
+					}
+				})
+			},
+			
+			selectPatientByStatus:function(status){
+				var this1=this;
+				this1.status=status
+				$.ajax({
+					url:"/money/patientstatus",
+					data:{
+						status:this1.status,
+						pagenumber:this1.patientlist.pageNum		
+					},
+					success:function(data){
+						if(data.code=200){
+							console.log(data)
+							this1.patientlist=data.obj;
+							for(var i=0;i<this1.patientlist.list.length;i++){
+								if(this1.patientlist.list[i].sex==1){
+									this1.patientlist.list[i].sex='男';
+								}else{
+									this1.patientlist.list[i].sex='女';
+								}
+							}
+						}
+					}
+				})
+			},
+			
+			qifei:function(cardId,pid){
+				this.showTotailplus=true;
+				this.cardId=cardId;
+				this.pid=pid;
+				this.selectPatientByPid();
+				
+			},
+			
+			wuhu:function(){
+				this.cardId=null;
+				this.page.list=[];
+				this.page.pageNum=1;
+				this.showTotail=true;
+			},
+			up:function(){
+				var this1=this;
+				if(this1.page.pageNum>1){
+					this1.page.pageNum=this1.page.pageNum-1;
+					if(this1.moneystatus==""){
+						this1.selectMoney();
+					}else{
+						this1.selectmoneyBystatus(this1.moneystatus,"false");
+					}
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			down:function(){
+				var this1=this;
+				if(this1.page.pageNum==this1.page.pages){
+					alert("已经是第最后1页了")
+					
+				}else{
+					this1.page.pageNum=this1.page.pageNum+1;
+					if(this1.moneystatus==""){
+						this1.selectMoney();
+					}else{
+						this1.selectmoneyBystatus(this1.moneystatus,"false");
+					}
+				}
+			},
+			
+			patientpageup:function(){
+				var this1=this;
+				console.log(this1.patientlist)
+				if(this1.patientlist.pageNum>1){
+					this1.patientlist.pageNum=this1.patientlist.pageNum-1;
+					this1.selectPatientByStatus();
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			patientpagedown:function(){
+				var this1=this;
+				console.log(this1.patientlist)
+
+				if(this1.patientlist.pageNum==this1.patientlist.pages){
+					alert("已经是第最后1页了")
+					
+				}else{
+					this1.patientlist.pageNum=this1.patientlist.pageNum+1;
+					this1.selectPatientByStatus();
+				}
+			},
+			
+			selectMoney:function(){
+				var this1=this;
+				$.ajax({
+					url:"/money/page",
+					data:{
+						cardId:this1.cardId,
+						pagenumber:this1.page.pageNum		
+					},
+					success:function(data){
+						console.log(data)
+						if(data.code="200"){
+							this1.page=data.obj.list;
+							for(var i=0;i<this1.page.list.length;i++){
+								if(this1.page.list[i].status==1){
+									this1.page.list[i].status='存入';
+								}else{
+									this1.page.list[i].status='消费';
+								}
+							}
+						}
+					}
+				})
+			}
+		},
+		watch:{
+		
+		}
+	})
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>入院登记</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<!-- 引入组件库 -->
+<script src="/js/index.js"></script>
+</head>
+<body>
+	<div id="app">
+		<template>
+			<el-table :data="appointments" border style="width: 100%"> 
+			<el-table-column fixed prop="id" label="编号"></el-table-column> 
+			<el-table-column prop="name" label="用户名"> </el-table-column>
+			<el-table-column prop="idCard" label="身份证号码"> </el-table-column>  
+			<el-table-column prop="phone" label="电话号码"> </el-table-column> 
+			<el-table-column prop="sex" label="性别"> </el-table-column>
+			<el-table-column prop="age" label="年龄"> </el-table-column> 
+			<el-table-column prop="department" label="科室"> </el-table-column> 
+			<el-table-column prop="beds" label="床位"> </el-table-column> 
+			<el-table-column prop="status" label="状态"> </el-table-column> 
+			<el-table-column prop="appointmentTime" label="预约时间"> </el-table-column> 
+			<el-table-column prop="creationTime" label="创建时间"> </el-table-column>  
+			<el-table-column label="操作">
+			<template slot-scope="scope">
+				<el-button  @click="changeAppoStatus(scope.row.id,1)" type="text" size="small">预约成功</el-button>
+				<el-button  @click="changeAppoStatus(scope.row.id,2)" type="text" size="small">预约失败</el-button>
+			</template>
+			</el-table-column>
+  			</el-table>
+  			<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+		</template>
+  		
+		</template>
+	</div>
+	<script type="text/javascript">
+	var vm=new Vue({
+		el:'#app',
+		data:{
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+			depart:[],
+			appointments:[],
+			insertPaientButton:false,
+			insertPatientDialogVisible:false,
+			
+		},
+		created:function(){
+			this.selectAppointments();
+			//this.selectButton();
+		},
+		methods:{
+			
+			changeAppoStatus:function(id,status){
+				var _this=this;
+				$.ajax({
+					url:"/money/changeAppoStatus",
+					data:{id:id,
+						status:status
+						},
+					success:function(data){
+						if(data.code=="200"){
+							alert("操作成功")
+							_this.selectAppointments()
+						}
+					}
+				});
+			},
+			
+			 handleSizeChange(val) {
+				 var _this=this;
+			      _this.limit.pageSize=val;
+			      _this.selectAppointments();
+			      },
+			      handleCurrentChange(val) {
+			    	  var _this=this;
+			    	  _this.limit.pageNum=val;
+				      _this.selectAppointments();
+			      },
+			selectAppointments:function(){
+				var _this=this;
+				$.ajax({
+					url:"/money/selectAppos",
+					data:{pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+					success:function(data){
+						if(data.code=="200"){
+							console.log(data)
+							_this.appointments=data.obj.list;
+							for(var i=0;i<_this.appointments.length;i++){
+								if(_this.appointments[i].sex==1){
+									_this.appointments[i].sex="男";
+								}else{
+									_this.appointments[i].sex="女";
+								}
+									_this.appointments[i].status="待审核"
+								
+							}
+							_this.page.total=data.obj.total;
+							_this.page.pageNum=data.obj.pageNum;
+							_this.page.pageSize=data.obj.pageSize;
+						}
+						
+					}
+				});
+			},
+		
+		
+		},
+	})
+	</script>
+</body>
+</html>

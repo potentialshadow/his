@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>入院登记</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+<!-- 引入组件库 -->
+<script src="/js/index.js"></script>
+</head>
+<body>
+	<div id="app">
+		<template>
+			<el-table :data="appointments" border style="width: 100%"> 
+			<el-table-column fixed prop="id" label="编号"></el-table-column> 
+			<el-table-column prop="name" label="用户名"> </el-table-column>
+			<el-table-column prop="idCard" label="身份证号码"> </el-table-column>  
+			<el-table-column prop="phone" label="电话号码"> </el-table-column> 
+			<el-table-column prop="sex" label="性别"> </el-table-column>
+			<el-table-column prop="age" label="年龄"> </el-table-column> 
+			<el-table-column prop="department" label="科室"> </el-table-column> 
+			<el-table-column prop="beds" label="床位"> </el-table-column> 
+			<el-table-column prop="status" label="状态"> </el-table-column> 
+			<el-table-column prop="appointmentTime" label="预约时间"> </el-table-column> 
+			<el-table-column prop="creationTime" label="创建时间"> </el-table-column>  
+			<el-table-column label="操作">
+			<template slot-scope="scope">
+				<el-button  @click="insertPatient(scope.row.id)" type="text" size="small">信息录入</el-button>
+			</template>
+			</el-table-column>
+  			</el-table>
+  			<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+		</template>
+  			<el-dialog title="提示" :visible.sync="insertPatientDialogVisible" width="30%">
+  			 <el-form ref="form" :model="patient" label-width="80px">
+  			 <el-form-item label="病人姓名">
+  			  	<el-input v-model="patient.name"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="身份证号码">
+  			  	<el-input v-model="patient.idCard"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="电话号码">
+  			  	<el-input v-model="patient.phone"></el-input>
+  			</el-form-item>
+  			<el-form-item label="性别">
+			    <el-radio-group v-model="patient.sex">
+			      <el-radio label="男"></el-radio>
+			      <el-radio label="女"></el-radio>
+			    </el-radio-group>
+		  	</el-form-item>
+		  	 <el-form-item label="年龄">
+  			  	<el-input v-model="patient.age"></el-input>
+  			</el-form-item>
+  			 <el-form-item label="科室">
+		     <el-select v-model="patient.department" placeholder="请选择科室" >
+	    	 	<el-option
+		     	 v-for="item in depart"
+		     	 :key="item.id"
+		     	 :label="item.name"
+		     	 :value="item.name">
+		    	</el-option>
+	    	</el-select>
+		  </el-form-item>
+		  <el-form-item label="床位">
+  			  	<el-input v-model="patient.beds"></el-input>
+  			</el-form-item>
+		  </el-form>
+    		<el-button @click="insertPatientDialogVisible = false">取 消</el-button>
+    		<el-button type="primary" @click="insertPatients">提交</el-button>
+ 			</span>
+</el-dialog>
+		</template>
+	</div>
+	<script type="text/javascript">
+	var vm=new Vue({
+		el:'#app',
+		data:{
+			patient:{
+				id:0,
+				name:"",
+				idCard:"",
+				phone:"",
+				sex:"",
+				age:"",
+				department:'',
+				beds:""
+			},
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+			depart:[],
+			appointments:[],
+			insertPaientButton:false,
+			insertPatientDialogVisible:false,
+			
+		},
+		created:function(){
+			this.selectAppointments();
+			
+		},
+		methods:{
+			 handleSizeChange(val) {
+				 var _this=this;
+			      _this.limit.pageSize=val;
+			      _this.selectAppointments();
+			      },
+			      handleCurrentChange(val) {
+			    	  var _this=this;
+			    	  _this.limit.pageNum=val;
+				      _this.selectAppointments();
+			      },
+			selectAppointments:function(){
+				var _this=this;
+				$.ajax({
+					url:"/appointment",
+					data:{pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+					success:function(data){
+						if(data.code=="200"){
+							_this.appointments=data.obj.list;
+							for(var i=0;i<_this.appointments.length;i++){
+								if(_this.appointments[i].sex==1){
+									_this.appointments[i].sex="男";
+								}else{
+									_this.appointments[i].sex="女";
+								}
+								if(_this.appointments[i].status==0){
+									_this.appointments[i].status="待审核"
+								}else if(_this.appointments[i].status=1){
+									_this.appointments[i].status="已通过"
+								}else{
+									_this.appointments[i].status="被拒绝"
+								}
+							}
+							_this.page.total=data.obj.total;
+							_this.page.pageNum=data.obj.pageNum;
+							_this.page.pageSize=data.obj.pageSize;
+						}
+						
+					}
+				});
+			},
+		
+			insertPatient:function(id){
+				var _this=this;
+				_this.insertPatientDialogVisible=true;
+				$.ajax({
+					url:"/appointment/selectAppoById",
+					data:{id:id},
+					success:function(data){
+						if(data.code=="200"){
+							_this.patient.name=data.obj.name;
+							_this.patient.idCard=data.obj.idCard;
+							_this.patient.phone=data.obj.phone;
+							if(data.obj.sex==1){
+								_this.patient.sex="男";
+							}else{
+								_this.patient.sex="女";
+							} 
+							
+							_this.patient.age=data.obj.age,
+							_this.patient.department=data.obj.department,
+							_this.patient.beds=data.obj.beds
+							_this.patient.id=id;
+						}
+					}
+				}),
+				$.ajax({
+					url:"/depart",
+					type:"get",
+					success:function(data){
+						if(data.code=="200"){
+							_this.depart=data.list;
+						}
+					}
+				})
+				
+			},
+			insertPatients:function(){
+				var _this=this;
+				if(_this.patient.sex=="男"){
+					_this.patient.sex=1;
+				}else{
+					_this.patient.sex=2;
+				} 
+				$.ajax({
+					url:"/patient",
+					type:"post",
+					data:_this.patient,
+					success:function(data){
+						if(data.code=="200"){
+							alert("信息录入成功");
+							_this.insertPatientDialogVisible=false;
+							location.href="/page/nurse/register.html"
+						}
+					}
+				})
+			}
+		},
+	})
+	</script>
+</body>
+</html>

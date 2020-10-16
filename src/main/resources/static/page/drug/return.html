@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>退药管理</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/axios-0.18.0.js" ></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script type="text/javascript" src="/js/qs.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+
+<body>
+<div id="app">
+	<div class="block">
+	<el-row :gutter="20">
+	  <el-col :span="6"><el-input v-model="name" placeholder="请输入药品名" ></el-input></el-col>
+	<el-button type="primary" @click="insertPatient">查询</el-button>
+	</el-row>
+	</div>
+		<el-table :data="list" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			<el-table-column fixed prop="id" label="编号" > </el-table-column> 
+			<el-table-column prop="name" label="药品名"> </el-table-column> 
+			<el-table-column prop="number" label="数量"> </el-table-column>
+			<el-table-column prop="money" label="金额"> </el-table-column>
+			<el-table-column prop="creatTime" label="申请时间"> </el-table-column>
+			<el-table-column prop="note" label="备注"> </el-table-column>
+			<el-table-column label="操作" width="200%">
+				<template slot-scope="scope">
+					<el-button @click="deleteEmployee(scope.row.id,scope.row.ddid,scope.row.number,scope.row.money,scope.row.name)" type="text" size="small">审批通过</el-button>
+					<el-button @click="updateEmployee(scope.row.id)" type="text" size="small">退回</el-button>
+				</template>
+			</el-table-column> 
+		</el-table>
+	<template>
+		  <div class="block">
+		    <el-pagination
+		      @size-change="handleSizeChange"
+		      @current-change="handleCurrentChange"
+		      :current-Page="page.pageNum"
+		      :page-sizes="[6, 12, 18, 24]"
+		      :page-size="page.pageSize"
+		      layout="total, sizes, prev, pager, next, jumper"
+		      :total="page.total">
+		    </el-pagination>
+		  </div>
+	</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			//搜索条件
+			name:"",
+			list:[],
+			limit:{
+				page:1,
+				num:6
+			},
+			re:{
+				id:0,
+				ddid:0
+			
+			},
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			run:{
+				ddid:0,
+				id:0,
+				money: 0,
+				name: "",
+				number: 1
+			},
+			pageText:false,
+			deleteButton:true,
+			showTotail:false,
+		
+		},
+		
+		methods: {
+			insertPatient:function(){
+				console.log(this.drugitem);
+				var _this = this;
+				$.ajax({
+					url: "/drug/qureryReturnMess",
+					type:"post",
+					data:JSON.stringify({name:_this.name,pageNum:_this.limit.page,pageSize:_this.limit.num}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						_this.list=data.obj.list;
+						for(var i=0;i<data.obj.list.length;i++){
+							if(data.obj.list[i].note==null){
+								_this.list[i].note="无";
+							}
+						}
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+					}
+				})
+			},
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.insertPatient();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.insertPatient();
+			},
+			//退回
+			updateEmployee:function(id){
+				this.re.id=id;
+				var _this=this;
+				axios.post("/drug/nruUpdataRuterunMess",_this.re)
+				.then(function(res){
+					if(res.data.code==200){
+						alert("成功");
+						_this.insertPatient();
+					}
+				})
+			},
+			//审批通过
+			deleteEmployee:function(id,ddid,number,money,name){
+				this.run.id=id;
+				this.run.ddid=ddid;
+				this.run.number=number;
+				this.run.money=money;
+				this.run.name=name;
+	
+				var _this=this;
+				axios.post("/drug/updataRuterunMess",_this.run)
+				.then(function(res){
+					if(res.data.code==200){
+						alert("成功");
+						_this.insertPatient();
+					}
+				})
+			}
+		},
+	})
+</script>
+</body>
+</html>

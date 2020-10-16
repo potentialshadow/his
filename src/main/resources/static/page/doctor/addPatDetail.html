@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增病历</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  
+
+  .main{
+  		width: 100%;
+		height: 700px;
+  }
+  .a-class{
+  	color: white;
+  	text-decoration: none;
+  	 color:cadetblue;
+  }
+</style>
+
+<body>
+<div id="app">
+	<el-form>
+		<el-input  v-model="pid" placeholder="请输入病人编号"></el-input>
+		<el-button @click="selectAll">查询</el-button>
+		<el-button @click="showTotailall">新增单条记录</el-button>
+	</el-form>
+	<el-tag>病人病历详情</el-tag>
+	<el-table :data="patlist.list" border style="width: 100%">
+			<el-table-column fixed prop="id" label="编号"></el-table-column>
+			<el-table-column prop="pid" label="病人编号"></el-table-column>
+			<el-table-column prop="detail" label="病人基本状态"> </el-table-column>
+			<el-table-column prop="patDetail" label="病人详细情况"> </el-table-column>
+			<el-table-column prop="pName" label="病人姓名"> </el-table-column>
+	</el-table>
+	<el-button @click="up" type="text">上一页</el-button><el-button @click="down" type="text">下一页</el-button>
+	<el-form>
+	<el-tag>病人费用详情</el-tag></el-form>
+	
+	<el-table :data="moneylist.list" border style="width: 100%">
+			<el-table-column fixed prop="id" label="编号"></el-table-column>
+			<el-table-column prop="detail" label="详情"></el-table-column>
+			<el-table-column prop="time" label="时间"> </el-table-column>
+			<el-table-column prop="money" label="剩余金额"> </el-table-column>
+			<el-table-column prop="status" label="状态"> </el-table-column>
+	</el-table>
+	<el-button @click="upmoney" type="text">上一页</el-button><el-button @click="downmoney" type="text">下一页</el-button>
+	<el-dialog title="新增单条病历" :visible.sync="showTotailplus" width="60%" center>
+	<el-form>
+		<el-input  v-model="patdetail.pid" placeholder="请输入病人编号"></el-input>
+		<el-input  v-model="patdetail.detail" placeholder="请输入病人基本状态"></el-input>
+		<el-input  v-model="patdetail.patDetail" placeholder="请输入病人详细情况"></el-input>
+		<el-input  v-model="patdetail.pName" placeholder="请输入病人姓名"></el-input>
+		<el-button @click="insertPatDetail">提交</el-button>
+	</el-form>
+	</el-dialog>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			showTotailplus:false,
+			pid:"",
+			patdetail:{
+				id:"",
+				pid:"",
+				detail:"",
+				patDetail:"",
+				pName:""
+			},
+			patlist:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: "",
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				list:[]
+			},
+			moneylist:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: "",
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				list:[]
+			},
+			
+		},
+		methods: {
+			
+			up:function(){
+				var this1=this;
+				if(this1.patlist.pageNum>1){
+					this1.patlist.pageNum=this1.patlist.pageNum-1;
+					this1.selectPatDetail();
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			down:function(){
+				var this1=this;
+				
+				if(this1.patlist.pageNum==this1.patlist.pages){
+					alert("已经是第最后1页了")
+				}else{
+					this1.patlist.pageNum=this1.patlist.pageNum+1;
+					this1.selectPatDetail();
+				}
+			},
+			
+			upmoney:function(){
+				var this1=this;
+				if(this1.moneylist.pageNum>1){
+					this1.moneylist.pageNum=this1.moneylist.pageNum-1;
+					this1.selectMoneyDetail();
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			downmoney:function(){
+				var this1=this;
+				
+				if(this1.moneylist.pageNum==this1.moneylist.pages){
+					alert("已经是第最后1页了")
+				}else{
+					this1.moneylist.pageNum=this1.moneylist.pageNum+1;
+					this1.selectMoneyDetail();
+				}
+			},
+			
+			insertPatDetail:function(){
+				var this1=this;
+				alert(this1.patdetail)
+				$.ajax({
+					url:"/doctor/insertPatDetail",
+				    data: this1.patdetail,
+					success:function(data){
+						console.log(data)
+						if(data.message=="新增成功"){
+							alert("新增成功")
+						}
+					}
+				})
+				
+			},
+			
+			selectAll:function(){
+				this.selectPatDetail();
+				this.selectMoneyDetail();
+			},
+			
+			selectPatDetail:function(){
+				var this1=this;
+				$.ajax({
+					url:"/doctor/selectPatDetail",
+				    data: {
+				    	pid:this1.pid,
+				    	pagenumber:this1.patlist.pageNum
+				    },
+					success:function(data){
+						console.log(data)
+						if(data.message=="查询成功"){
+							this1.patlist=data.obj
+							this1.patlist.advicelist=data.obj.list;
+						}
+					}
+				})
+			},
+			
+			selectMoneyDetail:function(){
+				var this1=this;
+				$.ajax({
+					url:"/doctor/selectMoneyDetail",
+				    data: {
+				    	pid:this1.pid,
+				    	pagenumber:this1.moneylist.pageNum
+				    },
+					success:function(data){
+						console.log(data)
+						if(data.message=="查询成功"){
+							this1.moneylist=data.obj
+							this1.moneylist.advicelist=data.obj.list;
+						}
+					}
+				})
+			},
+			
+			
+			showTotailall:function(){
+				this.showTotailplus=true
+			},
+			
+			
+		},
+		created:function(){
+			
+		},
+		watch:{
+			
+		}
+	})
+</script>
+</body>
+</html>

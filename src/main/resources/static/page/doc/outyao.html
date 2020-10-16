@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>申请退药</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/axios-0.18.0.js" ></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script type="text/javascript" src="/js/qs.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+<div id="app">
+<div class="block">
+	<el-row :gutter="20">
+	  <el-col :span="6"><el-input v-model="name" placeholder="请输入病人姓名" ></el-input></el-col>
+	  <el-col :span="6"><el-input v-model="item" placeholder="请输入处方药编号" ></el-input></el-col>
+	<el-button type="primary" @click="insertPatient">查询</el-button>
+	</el-row>
+	</div>
+		<el-table :data="list" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			<el-table-column fixed prop="id" label="编号" > </el-table-column> 
+			<el-table-column prop="did" v-if="pageText"></el-table-column>
+			<el-table-column prop="name" label="病人姓名" > </el-table-column>
+			<el-table-column prop="drug_name" label="药品名"> </el-table-column> 
+			<el-table-column prop="number" label="数量"> </el-table-column>
+			<el-table-column prop="price" label="价格"> </el-table-column>
+			<el-table-column prop="note" label="备注"> </el-table-column>
+			<el-table-column prop="status" label="状态"> </el-table-column>
+			<el-table-column label="操作" width="200%">
+				<template slot-scope="scope">
+					<el-button  @click="deleteEmployee(scope.row.number,scope.row.id,scope.row.drug_name,scope.row.price)" type="text" size="small">申请退药</el-button>
+				</template>
+			</el-table-column> 
+		</el-table>
+		<el-dialog title="退药" :visible.sync="showTotail" height="800px">
+		<template>
+			
+			数量：<el-button >{{numtem}}</el-button>
+		</template>
+		
+  		<template>
+  			请选择退药数量：<el-input-number v-model="yao.number" :min="1" :max="numtem"></el-input-number>
+  		</template>
+  		
+  		<el-button @click="dialogVisible">提交</el-button>
+	    <el-button type="primary" @click="showTotail=false">取消</el-button>
+	</el-dialog>
+	<template>
+		  <div class="block">
+		    <el-pagination
+		      @size-change="handleSizeChange"
+		      @current-change="handleCurrentChange"
+		      :current-Page="page.pageNum"
+		      :page-sizes="[6, 12, 18, 24]"
+		      :page-size="page.pageSize"
+		      layout="total, sizes, prev, pager, next, jumper"
+		      :total="page.total">
+		    </el-pagination>
+		  </div>
+	</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			//搜索条件
+			name:"",
+			item:"",
+			yao:{
+				ddid:0,
+				number:1,
+				name:"",
+				money:0,
+				price:0
+			},
+			list:[],
+			limit:{
+				page:1,
+				num:6
+			},
+			numtem:0,
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			
+			pageText:false,
+			showTotail:false,
+		
+		},
+		
+		methods: {
+			insertPatient:function(){
+			
+				var _this = this;
+				$.ajax({
+					url: "/drug/soushuo",
+					type:"post",
+					data:JSON.stringify({name:_this.name,item:_this.item,pageNum:_this.limit.page,pageSize:_this.limit.num}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						console.log(data);
+						_this.list=data.obj.list;
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+					}
+				})
+			},
+			 //点击退药
+			deleteEmployee:function(number,id,name,price){
+				this.numtem=number;
+				this.yao.price=price
+				this.yao.ddid=id;
+				this.yao.name=name;
+				this.showTotail=true;
+			},
+			//提交
+			dialogVisible:function(){
+				this.yao.money=this.yao.price*this.yao.number
+		    	var _this = this;
+				axios.post("/doc2/outDrug",_this.yao)
+		    	.then(function(res){
+		    		if(res.data.code==200){
+		    			alert("提交成功");
+		    			_this.showTotail=false;
+		    			_this.insertPatient();
+		    		}
+		    	})
+				
+			},
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.insertPatient();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.insertPatient();
+			},
+			
+		},
+	})
+</script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增医嘱</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  
+
+  .main{
+  		width: 100%;
+		height: 700px;
+  }
+  .a-class{
+  	color: white;
+  	text-decoration: none;
+  	 color:cadetblue;
+  }
+</style>
+
+<body>
+<div id="app">
+	
+		<el-form>
+		<el-button @click="showTotailone">新增单个医嘱</el-button>
+		
+		<el-button @click="showTotailall">新增医嘱套餐</el-button>
+		
+		<el-form-item label="医嘱状态">
+				<el-select v-model="status" placeholder="医嘱状态">
+					<el-option  label="待审核" :value="0"></el-option>
+					<el-option  label="待执行" :value="1"></el-option>
+					<el-option  label="已执行" :value="2"></el-option>
+				</el-select>
+		</el-form-item>
+		</el-form>
+		<el-table :data="docAdvicelist.advicelist" border style="width: 100%">
+			<el-table-column fixed prop="id" label="编号"></el-table-column>
+			<el-table-column prop="drugName" label="名称"></el-table-column>
+			<el-table-column prop="number" label="药品数量"> </el-table-column>
+			<el-table-column prop="price" label="价格"> </el-table-column>
+			<el-table-column prop="note" label="备注/时间"> </el-table-column>
+			<el-table-column prop="status" label="执行状态"> </el-table-column>
+			<el-table-column prop="type" label="类型"> </el-table-column>
+			<el-table-column  label="操作"> 
+					<template slot-scope="scope">
+						<el-button  @click="deleteadvice(scope.row.id)"  type="text" size="small">删除医嘱</el-button>
+					</template>
+			</el-table-column>
+		</el-table>
+		<el-button @click="up" type="text">上一页</el-button><el-button @click="down" type="text">下一页</el-button>
+		<template>  
+		<el-dialog title="新增多条医嘱信息" :visible.sync="showTotail" width="60%" center>
+		
+			请输入病人病历号<el-input placeholder="请输入病人病历号"	v-model="alldetails.pid" ></el-input>
+			<template>
+				  <el-select v-model="value" placeholder="请选择医嘱类型">
+				    <el-option
+				      v-for="item in options"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				  </el-select>
+			</template>
+			<el-form>
+			<el-form-item v-if="value!='药物'" >
+                  <span class="demonstration">选择时间</span>
+			    	<el-date-picker
+			    	  v-model="value1"
+			     	 type="date"
+			     	 placeholder="选择日期"
+			     	 value-format="yyyy-MM-dd HH:mm:ss"
+			     	  :picker-options="pickerOptions">
+	    			</el-date-picker>
+            </el-form-item>
+            </el-form>
+	 		<el-input  v-model="details.drugName"></el-input>
+	 		
+	 		<el-input v-if="value=='药物'" v-model="details.note" ></el-input>
+	 		
+	 		<el-input	v-if="value=='药物'"	v-model="details.number"></el-input>
+	 		
+	 		<el-input	v-if="value!='药物'"	v-model="details.price"></el-input>
+	 		
+	 		<el-button @click="adddetail">保存一条</el-button>
+	 		
+	 		<el-button @click="insertdetails">确认新增</el-button> 
+		</el-dialog>
+		
+	  	<el-dialog title="新增单条医嘱" :visible.sync="showTotailplus" width="60%" center>
+	  		请输入病人病历号<el-input placeholder="请输入病人病历号"	v-model="alldetails.pid" ></el-input>
+			<template>
+				  <el-select v-model="value" placeholder="请选择医嘱类型">
+				    <el-option
+				      v-for="item in options"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				  </el-select>
+			</template>
+			<el-form>
+			<el-form-item v-if="value!='药物'" >
+                  <span class="demonstration">选择时间</span>
+			    	<el-date-picker
+			    	  v-model="value1"
+			     	 type="date"
+			     	 placeholder="选择日期"
+			     	 value-format="yyyy-MM-dd HH:mm:ss"
+			     	  :picker-options="pickerOptions">
+	    			</el-date-picker>
+            </el-form-item>
+            </el-form>
+	 		<el-input  v-model="details.drugName"></el-input>
+	 		
+	 		<el-input v-if="value=='药物'" v-model="details.note" ></el-input>
+	 		
+	 		<el-input	v-if="value=='药物'"	v-model="details.number"></el-input>
+	 		
+	 		<el-input	v-if="value!='药物'"	v-model="details.price"></el-input>
+	 		
+	 		
+	 		<el-button @click="addonedetail">确认新增</el-button> 
+		</el-dialog>
+		</template>
+  </el-select>
+		
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			docAdvicelist:{
+				nextPage: "",
+				pageNum: 1,
+				pageSize: "",
+				pages: "",
+				prePage: 0,
+				size: "",
+				startRow: "",
+				total: "",
+				advicelist:[]
+			},
+			status:0,
+			type:"",
+			showTotail:false,
+			showTotailplus:false,
+			alldetails:{
+				pid:"",
+				detail:[]
+			},
+			details:{
+				note:"",
+				drugName:"",
+				number:0,
+				type:"",
+				price:"",
+				status:0
+			},
+			 options: [{
+		          value: '药物',
+		          label: '药物'
+		        }, {
+		          value: '手术',
+		          label: '手术'
+		        }, {
+		          value: '检查',
+		          label: '检查'
+		        }],
+		        value:'',
+		        value1: '',
+		        pickerOptions:{
+	                 disabledDate(time) {
+	                     return time.getTime() < Date.now()-8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
+	                 }
+	             }
+		},
+		methods: {
+			
+			up:function(){
+				var this1=this;
+				if(this1.docAdvicelist.pageNum>1){
+					this1.docAdvicelist.pageNum=this1.docAdvicelist.pageNum-1;
+					this1.selectAdvice();
+				}else{
+					alert("已经是第一页了")
+				}
+			},
+			down:function(){
+				var this1=this;
+				
+				if(this1.docAdvicelist.pageNum==this1.docAdvicelist.pages){
+					alert("已经是第最后1页了")
+				}else{
+					this1.docAdvicelist.pageNum=this1.docAdvicelist.pageNum+1;
+					this1.selectAdvice();
+				}
+			},
+			
+			deleteadvice:function(id){
+				var this1=this;
+				$.ajax({
+					url:"/doctor/"+id,
+					type:"delete",
+					success:function(data){
+						if(data.message=="删除成功"){
+							alert("删除成功");
+							this1.selectAdvice();
+						}
+					}
+				})
+			},
+			
+			showTotailone:function(){
+				this.showTotailplus=true;
+				this.alldetails.detail=[];
+				this.details={
+					note:"",
+					drugName:"",
+					number:0,
+					type:"",
+					price:"",
+					status:0
+				};
+			},
+			
+			showTotailall:function(){
+				this.showTotail=true;
+				this.alldetails.detail=[];
+				this.details={
+						note:"",
+						drugName:"",
+						number:0,
+						type:"",
+						price:"",
+						status:0
+					};
+			},
+			
+
+			addonedetail:function(){
+				if(this.value!="药物"){
+					this.details.note=this.value1;
+				}
+				var	this1=this;
+				var	data={
+					note:this.details.note,
+					drugName:this.details.drugName,
+					number:this.details.number,
+					type:this.details.type,
+					price:this.details.price,
+					status:this.details.status
+				};
+				console.log(data)
+				this1.alldetails.detail.push(data);
+				this.insertdetails();
+				this.value=""
+			},
+			
+			
+			adddetail:function(){
+				if(this.value!="药物"){
+					this.details.note=this.value1;
+				}
+				var	this1=this;
+				var	data={
+					note:this.details.note,
+					drugName:this.details.drugName,
+					number:this.details.number,
+					type:this.details.type,
+					price:this.details.price,
+					status:this.details.status
+				};
+				console.log(data)
+				this1.alldetails.detail.push(data);
+				this.details.value="",
+				alert("单条保存成功"+this.value1)
+			},
+			
+			insertdetails:function(){
+				var this1=this;
+				$.ajax({
+					url:"/doctor/addadvice",
+					type:"post",
+					dataType: "json",
+				    data: JSON.stringify(this1.alldetails),
+					contentType : 'application/json',
+					success:function(data){
+						if(data.message=="新增医嘱成功"){
+							this1.selectAdvice();
+						}
+					}
+				})
+			},
+			
+			selectAdvice:function(){
+				var this1=this;
+				$.ajax({
+					url:"/doctor/selectadvice",
+					type:"post",
+				    data: {
+				    	pageNumber:this1.docAdvicelist.pageNum,
+				    	status:this1.status
+				    },
+					success:function(data){
+						
+						console.log(data)
+						if(data.message=="查询成功"){
+							this1.docAdvicelist=data.obj
+							this1.docAdvicelist.advicelist=data.obj.list;
+							for(var i=0;i<this1.docAdvicelist.advicelist.length;i++){
+								if(this1.docAdvicelist.advicelist[i].status==0){
+									this1.docAdvicelist.advicelist[i].status='待审核'
+								}
+								if(this1.docAdvicelist.advicelist[i].status==1){
+									this1.docAdvicelist.advicelist[i].status='待执行'
+								}
+								if(this1.docAdvicelist.advicelist[i].status==2){
+									this1.docAdvicelist.advicelist[i].status='已执行'
+								}
+							}
+							
+						}
+					}
+				})
+			}
+			
+		},
+		created:function(){
+			this.selectAdvice()
+		},
+		watch:{
+			status:{
+				deep:true,
+				handler:function(){
+					this.docAdvicelist.pageNum=1;
+					this.selectAdvice();
+				}
+			},
+			
+			value:{
+				deep:true,
+				handler:function(){
+					if(this.value=="药物"){
+						this.details.note="请输入药品每日用量";
+						this.details.drugName="请输入药品名";
+						this.details.number="请输入药品总量";
+						this.details.type="药品";
+						this.details.price="";
+					}else	if(this.value=="手术"){
+						this.details.drugName="请输入手术名";
+						this.details.type="手术",
+						this.details.price="请输入手术价格";
+						this.details.number=1;
+					}else   if(this.value=="检查"){
+						this.details.drugName="请输入检查名";
+						this.details.type="检查";
+						this.details.price="请输入检查价格";
+						this.details.number=1;
+					}else {
+						this.details.drugName="";
+						this.details.type="";
+						this.details.price="";
+						this.details.number="";
+					}
+				}
+			}
+		}
+	})
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户查询预约信息</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<style>
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+    .el-row {
+    margin-bottom: 20px;
+    
+  }
+
+</style>
+
+<body>
+<div id="app">
+	
+	<template>
+			<el-table :data="appos" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			<el-table-column fixed prop="id" label="编号" > </el-table-column> 
+			<el-table-column prop="name" label="姓名" > </el-table-column>
+			<el-table-column prop="idCard" label="身份证号"> </el-table-column> 
+			<el-table-column prop="phone" label="电话"> </el-table-column>
+			<el-table-column prop="sex" label="性别"> </el-table-column>
+			<el-table-column prop="age" label="年龄"> </el-table-column>
+			<el-table-column prop="status" label="状态"></el-table-column>  
+		</el-table>
+	</template>
+	<template>
+			  <div class="block">
+			    <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-Page="page.pageNum"
+			      :page-sizes="[6, 12, 18, 24]"
+			      :page-size="page.pageSize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="page.total">
+			    </el-pagination>
+			  </div>
+		</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			appos:[],
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			pageText:false,
+			limit:{
+				pageNum:1,
+				pageSize:6,
+			},
+		},
+		created:function(){
+			this.select();
+			
+		},
+		methods: {
+			select:function(){
+				var _this = this;
+				$.ajax({
+					url: "/user/query",
+					type:"post",
+					data:JSON.stringify({pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						console.log(data.obj);
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+						_this.appos = data.obj.list;
+						for(var i=0;i<data.obj.list.length;i++){
+							if(data.obj.list[i].sex==1){
+								_this.appos[i].sex='男';
+							}
+							if(data.obj.list[i].sex==2){
+								_this.appos[i].sex='女';
+							}
+							if(data.obj.list[i].status==0){
+								_this.appos[i].status='未审核';
+							}
+							if(data.obj.list[i].status==1){
+								_this.appos[i].status='已通过';
+							}
+							if(data.obj.list[i].status==3){
+								_this.appos[i].status='已通过';
+							}
+							if(data.obj.list[i].status==2){
+								_this.appos[i].status='未通过';
+							}
+						}
+					}
+				})
+			},
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.select();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.select();
+			},
+			
+		},
+		
+	})
+</script>
+</body>
+</html>

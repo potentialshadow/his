@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>取药记录</title>
+<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/js/axios-0.18.0.js" ></script>
+<script type="text/javascript" src="/js/vue.min.js" ></script>
+<script type="text/javascript" src="/js/qs.js" ></script>
+<script src="/js/index.js"></script>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+<div id="app">
+	
+	<div class="block">
+	<el-row :gutter="20">
+	 	<el-col :span="6"><el-input v-model="paname" placeholder="请输入病人姓名" ></el-input></el-col>
+		<el-col :span="6"><el-input v-model="name" placeholder="请输入药品名" ></el-input></el-col>
+	<el-button type="primary" @click="insertPatient">查询</el-button>
+	</el-row>
+	</div>
+		<el-table :data="list" border style="width: 100%"> 
+			<el-table-column :data="limit.page" v-if="pageText"></el-table-column>
+			<el-table-column :data="limit.num" v-if="pageText"></el-table-column>
+			<el-table-column fixed prop="id" label="编号" > </el-table-column> 
+			<el-table-column prop="paname" label="病人姓名" > </el-table-column>
+			<el-table-column prop="name" label="药品名"> </el-table-column> 
+			<el-table-column prop="number" label="数量"> </el-table-column>
+			<el-table-column prop="price" label="价格"> </el-table-column>
+			<el-table-column prop="outtime" label="取药时间"> </el-table-column>
+		</el-table>
+	<template>
+		  <div class="block">
+		    <el-pagination
+		      @size-change="handleSizeChange"
+		      @current-change="handleCurrentChange"
+		      :current-Page="page.pageNum"
+		      :page-sizes="[6, 12, 18, 24]"
+		      :page-size="page.pageSize"
+		      layout="total, sizes, prev, pager, next, jumper"
+		      :total="page.total">
+		    </el-pagination>
+		  </div>
+	</template>
+</div>
+	<script type="text/javascript">
+	var mu=new Vue({
+		el:"#app",
+		data:{
+			//搜索条件
+			name:"",
+			paname:"",
+			
+			
+			list:[],
+			limit:{
+				page:1,
+				num:6
+			},
+			
+			page:{
+				total:0,
+				pageNum:0,
+				pageSize:0,
+			},
+			
+			pageText:false,
+			deleteButton:true,
+			showTotail:false,
+		
+		},
+		
+		methods: {
+			insertPatient:function(){
+				console.log(this.drugitem);
+				var _this = this;
+				$.ajax({
+					url: "/drug/record",
+					type:"post",
+					data:JSON.stringify({paname:_this.paname,name:_this.name,pageNum:_this.limit.page,pageSize:_this.limit.num}),
+					contentType:"application/json;charset=utf-8",
+					success: function(data) {
+						console.log(data);
+						_this.list=data.obj.list;
+						_this.page.total=data.obj.total;
+						_this.page.pageNum=data.obj.pageNum;
+						_this.page.pageSize=data.obj.pageSize;
+					}
+				})
+			},
+			
+			handleSizeChange(val) {
+				this.limit.num=val;
+				this.insertPatient();
+			},
+			handleCurrentChange(val) {
+				this.limit.page=val;
+				this.insertPatient();
+			},
+			
+		},
+	})
+</script>
+</body>
+</html>
