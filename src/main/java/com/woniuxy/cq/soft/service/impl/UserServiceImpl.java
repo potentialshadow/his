@@ -42,7 +42,11 @@ public class UserServiceImpl implements UserService {
 		UserExample example = new UserExample();
 		example.createCriteria().andPhoneEqualTo(phone);
 		List<User> list = userMapper.selectByExample(example);
-		return list.get(0);
+		if(list!=null){
+			return list.get(0);
+		}else{
+			return null;
+		}
 	}
 	@Override
 	public void insertUser(User user) throws Exception {
