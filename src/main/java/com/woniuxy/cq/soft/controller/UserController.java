@@ -47,10 +47,10 @@ public class UserController {
 		JSONResult result = new JSONResult();
 		if(userByPhone!=null) {
 			if(userByPhone.getPassword().equals(user.getPassword())) {
+				uid=userByPhone.getId();
 				result.setCode("200");
 				result.setMessage("success");
 				result.setObj(userByPhone);
-				uid=userByPhone.getId();
 			}else {
 				result.setCode("410");
 				result.setMessage("密码错误");

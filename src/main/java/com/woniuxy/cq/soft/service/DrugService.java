@@ -21,7 +21,7 @@ public interface DrugService {
 
 	Object queryMessById(Integer id) throws Exception;
 
-	void updataMessById(Drug dr) throws Exception;
+	void updateMessById(Drug dr) throws Exception;
 
 	void deleteMessById(Integer id) throws Exception;
 

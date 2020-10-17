@@ -92,6 +92,7 @@ public class Doctor2ServiceImpl implements Doctor2Service{
 		doctorAdviceDetailsMapper.updateByPrimaryKeySelective(details);
 		System.out.println(re);
 		re.setStatus("1");
+
 		refundDetailsMapper.insertSelective(re);
 	}
 }

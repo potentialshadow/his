@@ -78,7 +78,7 @@ public class DrugController {
 	//更新药品信息
 	@RequestMapping("updataMessById")
 	public JSONResult updataMessById(Drug dr) throws Exception{
-		drugService.updataMessById(dr);
+		drugService.updateMessById(dr);
 		return new JSONResult("200","success",null,null);
 	}
 	//根据id删除
