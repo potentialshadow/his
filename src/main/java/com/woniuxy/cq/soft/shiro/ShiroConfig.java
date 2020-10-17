@@ -53,8 +53,7 @@ public class ShiroConfig {
 	   //authc：所有url都必须认证通过才可以访问
 	   filterChainDefinitionMap.put("/page/register.html", "anon");
 	   filterChainDefinitionMap.put("/page/login.html", "anon");
-	   filterChainDefinitionMap.put("/page/user/login.html", "anon");
-	   filterChainDefinitionMap.put("/page/user/index.html", "anon");
+	   filterChainDefinitionMap.put("/page/user/**", "anon");
 	   filterChainDefinitionMap.put("/js/**", "anon");
 	   filterChainDefinitionMap.put("/css/**", "anon");
 	   filterChainDefinitionMap.put("/img/**", "anon");
