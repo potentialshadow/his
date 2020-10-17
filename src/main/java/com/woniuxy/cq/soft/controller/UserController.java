@@ -47,10 +47,10 @@ public class UserController {
 		JSONResult result = new JSONResult();
 		if(userByPhone!=null) {
 			if(userByPhone.getPassword().equals(user.getPassword())) {
+				uid=userByPhone.getId();
 				result.setCode("200");
 				result.setMessage("success");
 				result.setObj(userByPhone);
-				uid=userByPhone.getId();
 			}else {
 				result.setCode("410");
 				result.setMessage("密码错误");
@@ -99,6 +99,8 @@ public class UserController {
 		//通过权限获取用户的ID，在set进去
 		//Subject subject = SecurityUtils.getSubject();
 		//User user = (User)subject.getPrincipal();
+		app.setUid(uid);
+		app.setStatus(0);
 		userService.insertApp(app);
 		return new JSONResult("200","success",null,null);
 	}

@@ -23,16 +23,15 @@ public class NursingController {
 	private NursingService nursingService;
 	@GetMapping
 	public JSONResult selectNursings(int pageNum,int pageSize)throws Exception{
-//		Subject subject = SecurityUtils.getSubject();
-//		Employees employees= (Employees) subject.getPrincipal();
-		return new JSONResult("200","success",null,nursingService.selectNursings(pageNum,pageSize,5));
+		Subject subject = SecurityUtils.getSubject();
+		Employees employees= (Employees) subject.getPrincipal();
+		return new JSONResult("200","success",null,nursingService.selectNursings(pageNum,pageSize,employees.getId()));
 	}
 	@PostMapping
 	public JSONResult selectNursings(Nursing nursing)throws Exception{
-//		Subject subject = SecurityUtils.getSubject();
-//		Employees employees= (Employees) subject.getPrincipal();
-//		nursing.setEid(employees.getId());
-		nursing.setEid(6);
+		Subject subject = SecurityUtils.getSubject();
+		Employees employees= (Employees) subject.getPrincipal();
+		nursing.setEid(employees.getId());
 		nursingService.insertNursing(nursing);
 		return new JSONResult("200","success",null,null);
 	}

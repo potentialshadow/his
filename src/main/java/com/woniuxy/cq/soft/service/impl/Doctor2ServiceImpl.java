@@ -77,6 +77,7 @@ public class Doctor2ServiceImpl implements Doctor2Service{
 		bedsMapper.updateByPrimaryKey(b1);
 		//pa的id是部门id
 		Department de=departmentMapper.selectByPrimaryKey(pa.getId());
+		System.out.println(de);
 		pa.setDepartment(de.getName());
 		pa.setId(null);
 		patientMapper.insertSelective(pa);
@@ -91,6 +92,7 @@ public class Doctor2ServiceImpl implements Doctor2Service{
 		doctorAdviceDetailsMapper.updateByPrimaryKeySelective(details);
 		System.out.println(re);
 		re.setStatus("1");
+
 		refundDetailsMapper.insertSelective(re);
 	}
 }

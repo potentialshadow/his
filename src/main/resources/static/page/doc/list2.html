@@ -84,7 +84,7 @@
                  </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="submitForm">保存</el-button>
-                    <el-button @click="insertPatientDialogVisible=false">取消</el-button>
+                    <el-button @click="down">取消</el-button>
                 </el-form-item>
             </el-form>
        </el-dialog>
@@ -109,6 +109,7 @@
 		data:{
 			name:"",
 			patient:{
+				id:0,
 				name:"",
 				idCard:"",
 				phone:"",
@@ -140,7 +141,12 @@
 			this.selectBed();
 			this.select();
 		},
+		created:function(){
+			this.insertPatient();
+		},
 		methods: {
+
+
 			//查询所有部门
 			select:function(){
 				var _this = this;
@@ -151,6 +157,9 @@
 						_this.depart = data.list;
 					}
 				})
+			},
+			down:function(){
+				this.insertPatientDialogVisible=false;
 			},
 			//查询床位
 			selectBed:function(){
@@ -185,10 +194,10 @@
 			//提交
 			submitForm:function(){
 				console.log(this.bed);
-				
+
 				var _this = this;
 				console.log(this.patient);
-				
+				_this.patient.id=this.depid;
 				axios.post("/doc2/insert",_this.patient)
 				.then(function(res){
 					if(res.data.code==200){

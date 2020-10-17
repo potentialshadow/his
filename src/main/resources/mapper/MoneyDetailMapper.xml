@@ -112,7 +112,7 @@
 
   <select id="selectByTime" resultMap="BaseResultMap">
     select <include refid="Base_Column_List" /> from money_detail where time &gt;= date(now()) and time &lt; DATE_ADD(date(now()),INTERVAL 1 DAY)
-    AND patid=#{patId} and status=1
+    AND patid=#{patId} and status=2
   </select>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -307,6 +307,6 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectOutMonry" resultType="map">
-  	SELECT eid,paid,pname,money,detail,time,o.`status` AS ostatus FROM out_hospital o LEFT JOIN money_detail m ON o.paid=m.patid WHERE paid=#{paid} AND m.`status`=2
+  	SELECT eid,paid,paname,money,detail,time,o.`status` AS ostatus FROM out_hospital o LEFT JOIN money_detail m ON o.paid=m.patid WHERE paid=#{paid} AND m.`status`=2
   </select>
 </mapper>

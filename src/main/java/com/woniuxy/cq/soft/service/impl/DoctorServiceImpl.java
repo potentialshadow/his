@@ -90,7 +90,7 @@ public class DoctorServiceImpl implements	DoctorService{
 		PageHelper.startPage(pagenumber, 10);
 		PatDetailExample example = new	PatDetailExample();
 		Criteria criteria = example.createCriteria();
-		criteria.andIdEqualTo(id);
+		criteria.andPidEqualTo(id);
 		List<PatDetail> list = pat.selectByExample(example);
 		PageInfo<PatDetail> pageinfo=new PageInfo<PatDetail>(list);
 		return pageinfo;

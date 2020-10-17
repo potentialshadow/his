@@ -82,7 +82,9 @@
 			showTotail:false,
 		
 		},
-		
+		created:function(){
+			this.insertPatient();
+		},
 		methods: {
 			insertPatient:function(){
 				console.log(this.drugitem);

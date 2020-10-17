@@ -128,7 +128,7 @@ public class DrugServiceImpl implements DrugService{
 	}
 	//更新药品信息
 	@Override
-	public void updataMessById(Drug dr) throws Exception{
+	public void updateMessById(Drug dr) throws Exception{
 		
 		drugMapper.updateByPrimaryKey(dr);
 	}
@@ -186,9 +186,9 @@ public class DrugServiceImpl implements DrugService{
 		MoneyDetail detail = new MoneyDetail();
 		
 		 detail.setMoney(re.getMoney());
-		 detail.setDetail("退药费");
+		 detail.setDetail("退药费:+"+re.getMoney());
 		 detail.setPatid(advice.getPaid());
-		 
+		detail.setStatus(1);
 		 moneyDetailMapper.insertSelective(detail);
 		 //通过病人的ID查询病人的信息
 		 PatientExample example3 = new PatientExample();
