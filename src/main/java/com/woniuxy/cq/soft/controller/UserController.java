@@ -28,6 +28,7 @@ import java.util.Map;
 public class UserController {
 	@Resource
 	private UserService userService;
+	private Integer uid;
 	/**
 	 * @Title: loginVerify
 	 * @Description: TODO
@@ -49,6 +50,7 @@ public class UserController {
 				result.setCode("200");
 				result.setMessage("success");
 				result.setObj(userByPhone);
+				uid=userByPhone.getId();
 			}else {
 				result.setCode("410");
 				result.setMessage("密码错误");
@@ -107,10 +109,9 @@ public class UserController {
 		//Subject subject = SecurityUtils.getSubject();
 		//User user = (User)subject.getPrincipal();
 		User u=new User();
-		u.setId(1);
+		u.setId(uid);
 		int	pageNum=(int) map.get("pageNum");
 		int	pageSize=(int) map.get("pageSize");
-
 		return new JSONResult("200","success",null,userService.queryApp(u,pageNum,pageSize));
 	}
 }

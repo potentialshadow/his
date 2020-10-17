@@ -54,12 +54,11 @@ public class ShiroConfig {
 	   filterChainDefinitionMap.put("/page/register.html", "anon");
 	   filterChainDefinitionMap.put("/page/login.html", "anon");
 	   filterChainDefinitionMap.put("/page/user/**", "anon");
+		filterChainDefinitionMap.put("/user/**", "anon");
 	   filterChainDefinitionMap.put("/js/**", "anon");
 	   filterChainDefinitionMap.put("/css/**", "anon");
 	   filterChainDefinitionMap.put("/img/**", "anon");
 	   filterChainDefinitionMap.put("/employees/login", "anon");
-	   filterChainDefinitionMap.put("/user/login", "anon");
-	   filterChainDefinitionMap.put("/user/register", "anon");
 	   filterChainDefinitionMap.put("/menu/user", "anon");
 	   //如果不满足上方所有的规则 则需要进行登录验证
 	   filterChainDefinitionMap.put("/logout", "logout");
