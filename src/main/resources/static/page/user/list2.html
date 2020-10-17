@@ -17,7 +17,7 @@
   }
     .el-row {
     margin-bottom: 20px;
-    
+
   }
 
 </style>
@@ -25,10 +25,10 @@
 <body>
 <div id="app">
     <template>
-    <el-container> 
+    <el-container>
 			<el-header>请填写预约信息
-			</el-header> 
-	<el-container>
+			</el-header>
+	</el-container>
         <section class="form_container">
             <el-form :model="appo" :rules="rules" class="registerForm" ref="appo" label-width="80px">
                 <el-form-item label="姓名" prop="name">
@@ -83,7 +83,7 @@
                 </el-form-item>
             </el-form>
         </section>
-</template>
+    </template>
 </div>
 	<script type="text/javascript">
 	var mu=new Vue({
@@ -116,11 +116,11 @@
                      { min: 2, max: 30, message: "长度在 2 到 30 个字符", trigger: "blur" }
                    ],
                    idCard: [
-                	   { required: true, message: '请输入身份证',  trigger: 'change'}, 
+                	   { required: true, message: '请输入身份证',  trigger: 'change'},
                 	   { pattern:/^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)/, message: '请输入正确的身份证',trigger: 'blur'}
                    ],
                    phone: [
-                	   { required: true, message: '请输入手机号码',  trigger: 'change'}, 
+                	   { required: true, message: '请输入手机号码',  trigger: 'change'},
                 	   { pattern:/^1[12345789]\d{9}$/, message: '请输入正确的手机号码',trigger: 'blur'}
                    ],
                    age: [
@@ -132,7 +132,7 @@
 		created:function(){
 			this.selectBed();
 			this.select();
-			
+
 		},
 		methods: {
 			select:function(){
@@ -146,7 +146,7 @@
 				})
 			},
 			selectBed:function(){
-			
+
 				var _this = this;
 				$.ajax({
 					url: "/user/bed",
@@ -160,7 +160,7 @@
 			submitForm:function(){
 				this.appo.id=this.depid;
 				var _this = this;
-				
+
 				$.ajax({
 					url: "/user/app",
 					data:_this.appo,
