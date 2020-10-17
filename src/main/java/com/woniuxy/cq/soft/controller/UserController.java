@@ -99,6 +99,8 @@ public class UserController {
 		//通过权限获取用户的ID，在set进去
 		//Subject subject = SecurityUtils.getSubject();
 		//User user = (User)subject.getPrincipal();
+		app.setUid(uid);
+		app.setStatus(0);
 		userService.insertApp(app);
 		return new JSONResult("200","success",null,null);
 	}

@@ -73,7 +73,7 @@
   			</el-table>
   				<el-table :data="medicals3" border style="width: 100%"> 
 			<el-table-column fixed prop="did" label="医嘱编号"></el-table-column> 
-			<el-table-column prop="drug_name" label="检查"> </el-table-column>
+			<el-table-column prop="drug_name" label="检查名称"> </el-table-column>
 			<el-table-column prop="number" label="次数"> </el-table-column> 
 			<el-table-column prop="price" label="单价"> </el-table-column>
 			<el-table-column prop="note" label="详情"> </el-table-column> 
@@ -140,12 +140,12 @@
 			 handleSizeChange(val) {
 				 var _this=this;
 			      _this.limit.pageSize=val;
-			      _this.selectAppointments();
+			      _this. selectPatients();
 			      },
 			      handleCurrentChange(val) {
 			    	  var _this=this;
 			    	  _this.limit.pageNum=val;
-				      _this.selectAppointments();
+				      _this. selectPatients();
 			      },
 			      selectPatients:function(){
 						var _this=this;

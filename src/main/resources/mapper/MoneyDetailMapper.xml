@@ -307,6 +307,6 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectOutMonry" resultType="map">
-  	SELECT eid,paid,pname,money,detail,time,o.`status` AS ostatus FROM out_hospital o LEFT JOIN money_detail m ON o.paid=m.patid WHERE paid=#{paid} AND m.`status`=2
+  	SELECT eid,paid,paname,money,detail,time,o.`status` AS ostatus FROM out_hospital o LEFT JOIN money_detail m ON o.paid=m.patid WHERE paid=#{paid} AND m.`status`=2
   </select>
 </mapper>

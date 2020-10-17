@@ -316,6 +316,6 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectNursings" resultType="map">
-	SELECT p.id AS pid,n.id,e.`name`,p.`name` AS pname,nursing_type,nursing_time,nursing_record,n.`status` FROM patient p RIGHT JOIN nursing n ON p.id=n.paid LEFT JOIN employees e ON n.eid=e.id WHERE eid=#{id}
+	SELECT p.id AS pid,n.id,e.`name`,p.`name` AS pname,nursing_type,nursing_time,nursing_record,n.`status` FROM patient p RIGHT JOIN nursing n ON p.id=n.paid LEFT JOIN employees e ON n.eid=e.id WHERE n.eid=#{id}
 	</select>
 </mapper>
