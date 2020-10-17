@@ -73,7 +73,7 @@ public class UserController {
 		password = MD5Utils.MD5EncodeUtf8(password);
 		user.setPassword(password);
 		User userByPhone = userService.selectUserByPhone(user.getPhone());
-		if(userByPhone!=null) {
+		if(userByPhone==null) {
 			return new JSONResult("408", "该手机号已注册,请登录!!!", null, null);
 		}else {
 			userService.insertUser(user);
