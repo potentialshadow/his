@@ -112,7 +112,7 @@
 
   <select id="selectByTime" resultMap="BaseResultMap">
     select <include refid="Base_Column_List" /> from money_detail where time &gt;= date(now()) and time &lt; DATE_ADD(date(now()),INTERVAL 1 DAY)
-    AND patid=#{patId} and status=1
+    AND patid=#{patId} and status=2
   </select>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">

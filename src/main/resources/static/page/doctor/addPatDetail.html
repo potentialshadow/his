@@ -179,20 +179,21 @@
 				this.selectPatDetail();
 				this.selectMoneyDetail();
 			},
-			
+
 			selectPatDetail:function(){
 				var this1=this;
 				$.ajax({
 					url:"/doctor/selectPatDetail",
-				    data: {
-				    	pid:this1.pid,
-				    	pagenumber:this1.patlist.pageNum
-				    },
+					type:"post",
+					data: {
+						pid:this1.pid,
+						pagenumber:this1.patlist.pageNum
+					},
 					success:function(data){
 						console.log(data)
 						if(data.message=="查询成功"){
 							this1.patlist=data.obj
-							this1.patlist.advicelist=data.obj.list;
+
 						}
 					}
 				})
@@ -210,7 +211,7 @@
 						console.log(data)
 						if(data.message=="查询成功"){
 							this1.moneylist=data.obj
-							this1.moneylist.advicelist=data.obj.list;
+
 						}
 					}
 				})
