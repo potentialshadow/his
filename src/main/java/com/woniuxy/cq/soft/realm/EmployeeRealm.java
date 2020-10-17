@@ -45,7 +45,9 @@ public class EmployeeRealm extends AuthorizingRealm{
 		SimpleAuthenticationInfo authenticationInfo=null;
 		try {
 			Employees employees=employeesService.selectByPhone(phone);
-			authenticationInfo = new SimpleAuthenticationInfo(employees,employees.getPassword(),getName());
+			if(employees!=null){
+				authenticationInfo = new SimpleAuthenticationInfo(employees,employees.getPassword(),getName());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

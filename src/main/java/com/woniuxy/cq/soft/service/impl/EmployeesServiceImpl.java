@@ -38,7 +38,7 @@ public class EmployeesServiceImpl implements EmployeesService {
 		EmployeesExample example = new EmployeesExample();
 		example.createCriteria().andPhoneEqualTo(phone);
 		List<Employees> list = employeesMapper.selectByExample(example);
-		if(list==null||list.size()>0) {
+		if(list!=null||!list.isEmpty()) {
 			return list.get(0);
 		}
 		return null;
