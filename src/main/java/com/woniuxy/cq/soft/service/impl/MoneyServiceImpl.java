@@ -171,7 +171,7 @@ public class MoneyServiceImpl implements MoneyService{
 		Appointment appointment = new Appointment();
 		appointment.setId(id);
 		appointment.setStatus(status);
-		appoMapper.updateByPrimaryKey(appointment);
+		appoMapper.updateByPrimaryKeySelective(appointment);
 	}
 	
 	@Override
