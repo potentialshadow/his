@@ -5,29 +5,13 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import com.woniuxy.cq.soft.entity.*;
+import com.woniuxy.cq.soft.mapper.*;
 import org.springframework.stereotype.Service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.woniuxy.cq.soft.entity.Appointment;
-import com.woniuxy.cq.soft.entity.Beds;
-import com.woniuxy.cq.soft.entity.BedsExample;
-import com.woniuxy.cq.soft.entity.DoctorAdviceDetails;
-import com.woniuxy.cq.soft.entity.Employees;
-import com.woniuxy.cq.soft.entity.MoneyDetail;
-import com.woniuxy.cq.soft.entity.Patient;
-import com.woniuxy.cq.soft.entity.PatientExample;
 import com.woniuxy.cq.soft.entity.PatientExample.Criteria;
-import com.woniuxy.cq.soft.entity.Role;
-import com.woniuxy.cq.soft.entity.RoleExample;
-import com.woniuxy.cq.soft.mapper.AppointmentMapper;
-import com.woniuxy.cq.soft.mapper.BedsMapper;
-import com.woniuxy.cq.soft.mapper.DoctorAdviceDetailsMapper;
-import com.woniuxy.cq.soft.mapper.DoctorAdviceMapper;
-import com.woniuxy.cq.soft.mapper.EmployeesMapper;
-import com.woniuxy.cq.soft.mapper.MoneyDetailMapper;
-import com.woniuxy.cq.soft.mapper.PatientMapper;
-import com.woniuxy.cq.soft.mapper.RoleMapper;
 import com.woniuxy.cq.soft.service.PatientService;
 @Service
 public class PatientServiceImpl implements PatientService {
@@ -47,6 +31,8 @@ public class PatientServiceImpl implements PatientService {
 	private MoneyDetailMapper moneyDetailMapper;
 	@Resource
 	private AppointmentMapper appointmentMapper;
+	@Resource
+	private DepartmentMapper departmentMapper;
 	@Override
 	//病历表新增数据
 	public void insertPatient(Patient patient) throws Exception {
@@ -119,10 +105,11 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public PageInfo<Patient> selectPByStatus(Integer pageNum, Integer pageSize,String name) throws Exception {
+	public PageInfo<Patient> selectPByStatus(Integer pageNum, Integer pageSize,Integer did) throws Exception {
 		PageHelper.startPage(pageNum, pageSize);
+		Department department=departmentMapper.selectByPrimaryKey(did);
 		PatientExample example = new PatientExample();
-		example.createCriteria().andDepartmentEqualTo(name).andStatusEqualTo("在院");
+		example.createCriteria().andDepartmentEqualTo(department.getName()).andStatusEqualTo("在院");
 		List<Patient> list = patientMapper.selectByExample(example);
 		PageInfo<Patient> pageInfo = new PageInfo<Patient>(list);
 		return pageInfo;
@@ -170,8 +157,8 @@ public class PatientServiceImpl implements PatientService {
 		moneyDetail.setMoney(doctorAdviceDetails.getNumber()*doctorAdviceDetails.getPrice());
 		moneyDetail.setPatid(paid);
 		moneyDetail.setStatus(2);
-		if(doctorAdviceDetails.getType().equals("护理")) {
-			moneyDetail.setDetail("护理-"+doctorAdviceDetails.getNumber()*doctorAdviceDetails.getPrice());
+		if(doctorAdviceDetails.getType().equals("检查")) {
+			moneyDetail.setDetail("检查-"+doctorAdviceDetails.getNumber()*doctorAdviceDetails.getPrice());
 			
 		}else if(doctorAdviceDetails.getType().equals("手术")) {
 			moneyDetail.setDetail("手术-"+doctorAdviceDetails.getNumber()*doctorAdviceDetails.getPrice());

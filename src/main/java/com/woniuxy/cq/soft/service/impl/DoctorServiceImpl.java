@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import com.woniuxy.cq.soft.entity.*;
+import com.woniuxy.cq.soft.mapper.*;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.woniuxy.cq.soft.entity.PatDetailExample.Criteria;
-import com.woniuxy.cq.soft.mapper.ConsultationMapper;
-import com.woniuxy.cq.soft.mapper.DrugMapper;
-import com.woniuxy.cq.soft.mapper.MoneyDetailMapper;
-import com.woniuxy.cq.soft.mapper.PatDetailMapper;
-import com.woniuxy.cq.soft.mapper.DoctorAdviceDetailsMapper;
-import com.woniuxy.cq.soft.mapper.DoctorAdviceMapper;
 import com.woniuxy.cq.soft.service.DoctorService;
 
 @Service
@@ -116,6 +111,12 @@ public class DoctorServiceImpl implements	DoctorService{
 	//新增单条病历
 	@Override
 	public void insertPatDetail(PatDetail patd) {
+		Subject subject = SecurityUtils.getSubject();
+		Employees employees= (Employees) subject.getPrincipal();
+		patd.setEid(employees.getId());
+		patd.seteName(employees.getName());
+		System.out.println(employees.toString());
+		System.out.println(patd);
 		pat.insertSelective(patd);
 	}
 

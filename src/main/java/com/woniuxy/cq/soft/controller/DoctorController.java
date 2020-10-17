@@ -56,10 +56,7 @@ public class DoctorController {
 	
 	@RequestMapping("insertPatDetail")
 	public JSONResult insertPatDetail(PatDetail patd) {
-		Subject subject = SecurityUtils.getSubject();
-		Employees employees= (Employees) subject.getPrincipal();
-		patd.setEid(employees.getId());
-		patd.seteName(employees.getName());
+		System.out.println(patd);
 		doctorSer.insertPatDetail(patd);
 		return new JSONResult("200","新增成功",null,null);
 	}

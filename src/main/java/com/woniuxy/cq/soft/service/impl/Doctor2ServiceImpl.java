@@ -4,23 +4,13 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.woniuxy.cq.soft.entity.*;
+import com.woniuxy.cq.soft.mapper.*;
 import org.springframework.stereotype.Service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.woniuxy.cq.soft.entity.DoctorAdviceDetails;
-import com.woniuxy.cq.soft.entity.DoctorAdviceDetailsExample;
-import com.woniuxy.cq.soft.entity.DrugRecords;
-import com.woniuxy.cq.soft.entity.OutHospital;
-import com.woniuxy.cq.soft.entity.OutHospitalExample;
-import com.woniuxy.cq.soft.entity.Patient;
-import com.woniuxy.cq.soft.entity.PatientExample;
-import com.woniuxy.cq.soft.entity.RefundDetails;
-import com.woniuxy.cq.soft.mapper.DoctorAdviceDetailsMapper;
-import com.woniuxy.cq.soft.mapper.OutHospitalMapper;
-import com.woniuxy.cq.soft.mapper.PatientMapper;
-import com.woniuxy.cq.soft.mapper.RefundDetailsMapper;
 import com.woniuxy.cq.soft.service.Doctor2Service;
 @Service
 public class Doctor2ServiceImpl implements Doctor2Service{
@@ -32,11 +22,15 @@ public class Doctor2ServiceImpl implements Doctor2Service{
 	private RefundDetailsMapper refundDetailsMapper;
 	@Resource
 	private  DoctorAdviceDetailsMapper  doctorAdviceDetailsMapper;
+	@Resource
+	private BedsMapper bedsMapper;
+	@Resource
+	private DepartmentMapper departmentMapper;
 	//动态查询在院病人
 	@Override
 	public Object queryPaMess(String name, int pageNum, int pageSize) throws Exception{
 		PatientExample example = new PatientExample();
-		example.createCriteria().andNameLike("%"+name+"%").andStatusEqualTo("0");
+		example.createCriteria().andNameLike("%"+name+"%").andStatusEqualTo("在院");
 		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
 		List<Patient> list = patientMapper.selectByExample(example);
 		PageInfo<Patient> pageInfo=new PageInfo<Patient>(list);
@@ -74,6 +68,17 @@ public class Doctor2ServiceImpl implements Doctor2Service{
 	@Override
 	public void insertPaid(Patient pa) {
 		pa.setStatus("在院");
+
+		BedsExample bedsExample=new BedsExample();
+		bedsExample.createCriteria().andRoomEqualTo(pa.getBeds());
+		List<Beds> list=  bedsMapper.selectByExample(bedsExample);
+		Beds b1=list.get(0);
+		b1.setStatus(1);
+		bedsMapper.updateByPrimaryKey(b1);
+		//pa的id是部门id
+		Department de=departmentMapper.selectByPrimaryKey(pa.getId());
+		pa.setDepartment(de.getName());
+		pa.setId(null);
 		patientMapper.insertSelective(pa);
 	}
 	//新增退药申请

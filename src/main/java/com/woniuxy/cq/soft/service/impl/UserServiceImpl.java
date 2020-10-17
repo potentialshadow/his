@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<Department> queryDepartment() throws Exception{
 		DepartmentExample example = new DepartmentExample();
-		example.createCriteria().andStatusEqualTo(1);
+		example.createCriteria().andStatusEqualTo(0);
 
 		return departmentMapper.selectByExample(example);
 	}
@@ -71,7 +71,10 @@ public class UserServiceImpl implements UserService {
 	//新增预约信息
 	@Override
 	public void insertApp(Appointment app) throws Exception{
-		System.out.println(app);
+		//app的id是部门id
+		Department de=departmentMapper.selectByPrimaryKey(app.getId());
+		app.setDepartment(de.getName());
+		app.setId(null);
 		appointmentMapper.insertSelective(app);
 	}
 	//查询预约信息

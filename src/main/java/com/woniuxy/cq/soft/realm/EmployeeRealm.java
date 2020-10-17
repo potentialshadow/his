@@ -44,7 +44,7 @@ public class EmployeeRealm extends AuthorizingRealm{
 		String phone=(String)token.getPrincipal();
 		SimpleAuthenticationInfo authenticationInfo=null;
 		try {
-			Employees employees=(Employees) employeesService.selectByPhone(phone);
+			Employees employees=employeesService.selectByPhone(phone);
 			authenticationInfo = new SimpleAuthenticationInfo(employees,employees.getPassword(),getName());
 		} catch (Exception e) {
 			e.printStackTrace();

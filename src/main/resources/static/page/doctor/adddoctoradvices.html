@@ -297,7 +297,6 @@
 					price:this.details.price,
 					status:this.details.status
 				};
-				console.log(data)
 				this1.alldetails.detail.push(data);
 				this.details.value="",
 				alert("单条保存成功"+this.value1)
@@ -312,6 +311,8 @@
 				    data: JSON.stringify(this1.alldetails),
 					contentType : 'application/json',
 					success:function(data){
+						this1.showTotail=false;
+						this1.showTotailplus=false;
 						if(data.message=="新增医嘱成功"){
 							this1.selectAdvice();
 						}

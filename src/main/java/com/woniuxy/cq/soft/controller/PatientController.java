@@ -58,9 +58,9 @@ public class PatientController {
 	//查询在院病人
 	@RequestMapping("selectPatientByStatus")
 	public JSONResult selectPatientByStatus(Integer pageNum,Integer pageSize)throws Exception{
-//		Subject subject = SecurityUtils.getSubject();
-//		Employees employees= (Employees) subject.getPrincipal();
-		return new JSONResult("200","success",null,patientService.selectPByStatus(pageNum, pageSize,"内科"));
+		Subject subject = SecurityUtils.getSubject();
+		Employees employees= (Employees) subject.getPrincipal();
+		return new JSONResult("200","success",null,patientService.selectPByStatus(pageNum, pageSize,employees.getDid()));
 		
 	}
 	//给病人指派医生，护士

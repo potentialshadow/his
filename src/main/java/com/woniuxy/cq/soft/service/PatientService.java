@@ -13,7 +13,7 @@ public interface PatientService {
 	void updatePatientBeds(Integer id)throws Exception;
 	void updatePatientBedsByname(Integer pid,String room)throws Exception;
 	PageInfo<Patient> selectPatient(Integer pageNum,Integer pageSize,String name,String status)throws Exception;
-	PageInfo<Patient> selectPByStatus(Integer pageNum,Integer pageSize,String name)throws Exception;
+	PageInfo<Patient> selectPByStatus(Integer pageNum,Integer pageSize,Integer did)throws Exception;
 	void insertEmp(Integer id,Integer paid)throws Exception;
 	List<Map<String,Object>> selectMedical(Integer paid)throws Exception;
 	void updateMedical(Integer id,Integer paid)throws Exception;

@@ -63,7 +63,7 @@
   					<el-radio v-model="patient.sex" label="2">女</el-radio>
   				</el-form-item>
                 <el-form-item >
-                   请选择科室<el-select v-model="depid" placeholder="请选择科室" >
+                   请选择科室<el-select v-model="depid" placeholder="请选择科室" @change="depchange(this)">
 			    	 <el-option
 				     	 v-for="item in depart"
 				     	 :key="item.id"
@@ -109,6 +109,7 @@
 		data:{
 			name:"",
 			patient:{
+				id:0,
 				name:"",
 				idCard:"",
 				phone:"",
@@ -154,16 +155,19 @@
 			},
 			//查询床位
 			selectBed:function(){
-				console.log(this.depid);
 				var _this = this;
 				$.ajax({
 					url: "/user/bed",
 					data:{depid:_this.depid},
 					success: function(data) {
-						console.log(data.list)
 						_this.bedss = data.list;
 					}
 				})
+			},
+			depchange:function(dep){
+				console.log($(dep).val());
+				this.depid=$(dep).val();
+				this.selectBed();
 			},
 			//查询入院记录
 			insertPatient:function(){
@@ -174,7 +178,6 @@
 					data:JSON.stringify({name:_this.name,pageNum:_this.limit.page,pageSize:_this.limit.num}),
 					contentType:"application/json;charset=utf-8",
 					success: function(data) {
-						console.log(data);
 						_this.list=data.obj.list;
 						_this.page.total=data.obj.total;
 						_this.page.pageNum=data.obj.pageNum;
@@ -184,18 +187,15 @@
 			},
 			//提交
 			submitForm:function(){
-				console.log(this.bed);
-				
+				this.patient.id=this.depid;
 				var _this = this;
-				console.log(this.patient);
-				
 				axios.post("/doc2/insert",_this.patient)
 				.then(function(res){
+				
 					if(res.data.code==200){
 						alert("提交成功");
 						_this.insertPatientDialogVisible=false;
 						_this.insertPatient();
-						_this.patient=null;
 					}
 				})
 			},
@@ -212,14 +212,7 @@
 				this.insertPatient();
 			},
 		},
-		//侦听部门id变化
-		watch:{
-			depid:function(){
-					console.log(1);
-					this.selectBed();
-			}
-		},
-	})
+})
 </script>
 </body>
 </html>
