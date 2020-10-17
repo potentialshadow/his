@@ -48,7 +48,7 @@
   					<el-radio v-model="appo.sex" label="2">女</el-radio>
   				</el-form-item>
                 <el-form-item >
-                   请选择科室<el-select v-model="depid" placeholder="请选择科室" >
+                   请选择科室<el-select v-model="depid" placeholder="请选择科室" @change="depchange(this)">
 			    	 <el-option
 				     	 v-for="item in depart"
 				     	 :key="item.id"
@@ -90,7 +90,7 @@
 		el:"#app",
 		data:{
 			appo:{
-				id:0,
+			    id:0,
 				name:"",
 				idCard:'',
 				age:'',
@@ -101,8 +101,8 @@
 				appointmentTime:""
 			},
 			depart:[],
+            depid:"",
 			bedss:[],
-			depid:"",
 			bed:"",
 			pickerOptions:{
                  disabledDate(time) {
@@ -135,6 +135,10 @@
 			
 		},
 		methods: {
+            depchange:function(dep){
+                this.depid=$(dep).val();
+                this.selectBed();
+            },
 			select:function(){
 				var _this = this;
 				$.ajax({
@@ -146,8 +150,7 @@
 				})
 			},
 			selectBed:function(){
-			
-				var _this = this;
+			    var _this = this;
 				$.ajax({
 					url: "/user/bed",
 					data:{depid:_this.depid},
@@ -160,7 +163,7 @@
 			submitForm:function(){
 				this.appo.id=this.depid;
 				var _this = this;
-				
+				console.log(this.time);
 				$.ajax({
 					url: "/user/app",
 					data:_this.appo,
@@ -173,20 +176,9 @@
 			},
 			//重置
 			resetForm :function(formName){
-
 				this.$refs[formName].resetFields();
-
 			}
 		},
-		//侦听部门id变化
-		watch:{
-			depid:{
-				deep:true,
-				handler:function(){
-					this.selectBed();
-				}
-			}
-		}
 	})
 </script>
 </body>
