@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.woniuxy.cq.soft.entity.DepartmentExample;
 import org.springframework.stereotype.Service;
 
 import com.woniuxy.cq.soft.entity.Department;
@@ -16,8 +17,9 @@ public class DepartServiceImpl implements DepartService {
 
 	@Override
 	public List<Department> selectDepart() throws Exception {
-		
-		return departmentMapper.selectByExample(null);
+		DepartmentExample departmentExample=new DepartmentExample();
+		departmentExample.createCriteria().andStatusEqualTo(0);
+		return departmentMapper.selectByExample(departmentExample);
 	}
 	
 
