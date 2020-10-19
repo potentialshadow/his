@@ -82,7 +82,7 @@ public class DrugServiceImpl implements DrugService{
 		//处方药要改为已取药
 		DoctorAdviceDetails doctorAdviceDetails = new DoctorAdviceDetails();
 		doctorAdviceDetails.setId(drug.getDdid());
-		doctorAdviceDetails.setStatus("已取药");
+		doctorAdviceDetails.setStatus("1");
 		doctorAdviceDetailsMapper.updateByPrimaryKeySelective(doctorAdviceDetails);
 		//新增药品出库记录
 		drugRecordsMapper.insertSelective(drug);

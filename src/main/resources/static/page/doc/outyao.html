@@ -108,6 +108,9 @@
 					success: function(data) {
 						console.log(data);
 						_this.list=data.obj.list;
+						if(data.obj.list.status=="1"){
+							_this.list.status="已取药";
+						}
 						_this.page.total=data.obj.total;
 						_this.page.pageNum=data.obj.pageNum;
 						_this.page.pageSize=data.obj.pageSize;
