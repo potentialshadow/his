@@ -38,7 +38,7 @@ public class MoneyController {
 		return new JSONResult("200","操作成功",null,null);
 	}
 	@RequestMapping("page")
-	public JSONResult	selectMoney(Integer cardId,Integer	pagenumber) {
+	public JSONResult	selectMoney(String cardId,Integer	pagenumber) {
 		return new JSONResult("200","success",null,service.selectByCardId(cardId,pagenumber));
 	}
 	

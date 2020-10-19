@@ -11,7 +11,7 @@ import com.woniuxy.cq.soft.entity.Patient;
 public interface MoneyService {
 	public void insertMoney(Patient pat);
 	
-	public Map<String,Object>	selectByCardId(Integer cardId,Integer	pageNumber);
+	public Map<String,Object>	selectByCardId(String cardId,Integer	pageNumber);
 	
 	public	Map<String,Object>	selectByTime(Integer cardId,Integer	pagenumber);
 	

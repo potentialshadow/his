@@ -57,14 +57,14 @@ public class MoneyServiceImpl implements MoneyService{
 	}
 	//出院结算查询
 	@Override
-	public Map<String, Object> selectByCardId(Integer cardId,Integer	pageNumber) {
+	public Map<String, Object> selectByCardId(String cardId,Integer	pageNumber) {
 		Map<String,Object> map=new HashMap<String,Object>(); 
 		//查询当前病人
 		PatientExample example = new PatientExample();
 		Criteria criteria = example.createCriteria();
-		criteria.andIdCardEqualTo(cardId+"");
+		criteria.andIdCardEqualTo(cardId);
 		List<Patient> list = pat.selectByExample(example);
-		if(list.size()>0) {
+		if(list!=null||!list.isEmpty()) {
 			Patient patient = list.get(0);
 			map.put("patient", patient);
 			//查询出病人的消费详情记录
