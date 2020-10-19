@@ -13,7 +13,7 @@
 	<div id="app">
 		<el-form :inline="true" :model="patient" class="demo-form-inline">
   <el-form-item label="病人编号">
-    <el-input v-model="patient.id" placeholder="请输入病人编号"></el-input>
+    <el-input v-model="id" placeholder="请输入病人编号"></el-input>
   </el-form-item>
   <el-form-item>
     <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -68,6 +68,7 @@
 				pageNum:1,
 				pageSize:6,
 			},
+			id:0,
 			moneyDetail:[],
 			nursings:[],
 			insertNursingDialogVisible:false,
@@ -120,7 +121,7 @@
 				 var _this=this;
 				 $.ajax({
 						url:"/moneyDetail/selectMoneyDetail",
-						data:{paid:_this.patient.id,pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
+						data:{paid:_this.id,pageNum:_this.limit.pageNum,pageSize:_this.limit.pageSize},
 						success:function(data){
 							if(data.code=="200"&&data.obj!=null){
 									_this.moneyDetail=data.obj.list;
@@ -129,13 +130,12 @@
 									_this.page.pageSize=data.obj.pageSize;
 							}else{
 								_this.moneyDetail=null;
-								alert("无该病人的出院申请");
 							}
 						},
 					});
 				 $.ajax({
 						url:"/outhospital/selectByPaid",
-						data:{paid:_this.patient.id},
+						data:{paid:_this.id},
 						success:function(data){
 							if(data.code=="200"&&data.obj!=null){
 								_this.patient=data.obj
@@ -149,6 +149,7 @@
 							}else{
 								_this.patient.paname='';
 								_this.patient.status='';
+								alert("无该病人的出院申请");
 							}
 							
 						}
